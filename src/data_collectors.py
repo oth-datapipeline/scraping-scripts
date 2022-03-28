@@ -5,13 +5,14 @@ import requests
 import re
 
 from constants import TIMEOUT_RSS_REQUEST
+from helper import get_request_with_timeout
 
 class BaseDataCollector(object): 
     def __init__(self):
         pass
     
     @abc.abstractmethod
-    def get_data_collection_futures(self, executor) -> list[Future]:
+    def get_data_collection_futures(self, executor):
         pass
 
 
@@ -19,10 +20,12 @@ class RssDataCollector(BaseDataCollector):
     def __init__(self, base_url):
         super().__init__()
         self.base_url = base_url
+    
 
     def get_data_collection_futures(self, executor):
         feed_urls = self._get_feed_urls()
-        futures = list(map(lambda url: executor.submit(partial(requests.get, url, TIMEOUT_RSS_REQUEST)), feed_urls))
+        get_request = get_request_with_timeout(TIMEOUT_RSS_REQUEST)
+        futures = list(map(lambda url: executor.submit(get_request, url), feed_urls))
         return futures
 
     def _get_feed_urls(self):

@@ -22,7 +22,8 @@ def get_arguments():
 
 def get_config(config_path): 
     config = configparser.ConfigParser()
-    return config.read(config_path)
+    config.read(config_path)
+    return config
 
 
 def get_data_collector_instance(args):
@@ -41,14 +42,14 @@ def main():
     config = get_config(args.config)
     kafka_host = config[CONFIG_KAFKA][CONFIG_KAFKA_HOST]
     kafka_port = config[CONFIG_KAFKA][CONFIG_KAFKA_PORT]
-    producer = Producer(kafka_host, str(kafka_port))
+    producer = Producer(kafka_host, kafka_port)
     data_collector = None
     try:
         data_collector = get_data_collector_instance(args)
     except NotImplementedError:
         logging.error(f'Data collection not implemented for data source {args.data_source}')
     
-    max_workers = config[CONFIG_GENERAL][CONFIG_GENERAL_MAX_WORKERS]
+    max_workers = int(config[CONFIG_GENERAL][CONFIG_GENERAL_MAX_WORKERS])
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         try:
             futures = data_collector.get_data_collection_futures(executor=executor)
@@ -58,5 +59,6 @@ def main():
             logging.error(f'Error in GET-Request: {e}')
 
 
-if __name__ == 'main': 
+
+if __name__ == '__main__':
     main()
