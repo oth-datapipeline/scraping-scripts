@@ -1,10 +1,9 @@
 import argparse
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import configparser
 from functools import partial
 import logging
 from requests.exceptions import RequestException
-
 from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_KAFKA, CONFIG_KAFKA_HOST, \
     CONFIG_KAFKA_PORT, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
@@ -53,11 +52,11 @@ def main():
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         try:
             futures = data_collector.get_data_collection_futures(executor=executor)
-            for future in futures:
-                future.add_done_callback(partial(producer.publish, args.data_source, future.result().text))
+            for future in as_completed(futures):
+                message = future.result().text
+                producer.publish(args.data_source, message)
         except RequestException as e:
             logging.error(f'Error in GET-Request: {e}')
-
 
 
 if __name__ == '__main__':
