@@ -27,11 +27,12 @@ class Producer(object):
         :param topic: topic where the message will be published
         :type topic: str
         :param message: The value of the message
-        :type message: bytes
+        :type message: str
         :raises KafkaTimeoutError: timeout when sending message or flushing the buffer
         """
         # TODO: splitting
-        key = bytes(uuid.uuid4(), encoding='utf-8')
+        key = bytes(str(uuid.uuid4()), encoding='utf-8')
+        value_bytes = bytes(message, encoding='utf-8')
         logging.info(f'Publish on topic {topic}: {key}')
-        self.producer.send(topic, key=key, value=message)
+        self.producer.send(topic, key=key, value=value_bytes)
         self.producer.flush()
