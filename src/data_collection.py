@@ -60,19 +60,21 @@ def main():
     producer = Producer(kafka_host, kafka_port)
     data_collector = None
     try:
-        data_collector = get_data_collector_instance(args)
+        data_collector = get_data_collector_instance(args, config)
     except NotImplementedError:
         logging.error(f'Data collection not implemented for data source {args.data_source}')
     
     max_workers = int(config[CONFIG_GENERAL][CONFIG_GENERAL_MAX_WORKERS])
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        try:
+        
             futures = data_collector.get_data_collection_futures(executor=executor)
             for future in as_completed(futures):
-                message = future.result().text
-                producer.publish(args.data_source, message)
-        except RequestException as e:
-            logging.error(f'Error in GET-Request: {e}')
+                try:
+                    message = future.result().text
+                    producer.publish(args.data_source, message)
+                except RequestException as e:
+                    logging.error(f'Error in GET-Request: {e}')
+                    continue
 
 
 if __name__ == '__main__':

@@ -1,8 +1,9 @@
 from kafka import KafkaProducer
 import logging
 import uuid
-
+import json
 from constants import PRODUCER_API_VERSION
+from helper import split_rss_feed
 
 class Producer(object):
     """Wrapper for a Kafka Producer
@@ -29,9 +30,28 @@ class Producer(object):
         :type message: str
         :raises KafkaTimeoutError: timeout when sending message or flushing the buffer
         """
-        # TODO: splitting
-        key = bytes(str(uuid.uuid4()), encoding='utf-8')
-        value_bytes = bytes(message, encoding='utf-8')
-        logging.info(f'Publish on topic {topic}: {key}')
-        self.producer.send(topic, key=key, value=value_bytes)
+        if ("rss" in topic):
+            self.__publish_rss(topic, message)
+        else:
+            key = bytes(str(uuid.uuid4()), encoding='utf-8')
+            value_bytes = bytes(message, encoding='utf-8')
+            logging.info(f'Publish on topic {topic}: {key}')
+            self.producer.send(topic, key=key, value=value_bytes)
         self.producer.flush()
+        
+
+    def __publish_rss(self, topic, raw_feed):
+        """Publish rss articles in the Kafka Broker
+
+        :param topic: topic where the message will be published
+        :type topic: str
+        :param raw_feed: RSS-Feed in XML-Format
+        :type raw_feed: str
+        :raises KafkaTimeoutError: timeout when sending message or flushing the buffer
+        """
+        messages = split_rss_feed(raw_feed)
+        for message in messages:
+            key = bytes(str(uuid.uuid4()), encoding='utf-8')
+            value_bytes = bytes(json.dumps(message), encoding='utf-8')
+            logging.info(f'Publish on topic {topic}: {key}')
+            self.producer.send(topic, key=key, value=value_bytes)
