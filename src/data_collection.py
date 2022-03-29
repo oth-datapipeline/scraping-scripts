@@ -1,17 +1,19 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import configparser
-from functools import partial
+import json
 import logging
 from requests.exceptions import RequestException
+
 from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_KAFKA, CONFIG_KAFKA_HOST, \
-    CONFIG_KAFKA_PORT, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER
+    CONFIG_KAFKA_PORT, CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer
 
 
 def get_arguments():
-    parser = argparse.ArgumentParser(description='Script for collecting data from different data sources and publish it to a Kafka broker')
+    """Get script arguments from the argument parser
+    """
+    parser = argparse.ArgumentParser(description='Script for collecting data from different data sources and publishing it to a Kafka broker')
     parser.add_argument('--config', required=True, help='Configuration file for the data collection script')
     subparsers = parser.add_subparsers(dest='data_source')
     rss_parser = subparsers.add_parser('rss', help='Scrape data from RSS feeds')
@@ -19,15 +21,29 @@ def get_arguments():
     return parser.parse_args()
 
 
-def get_config(config_path): 
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    return config
+def get_config(config_path):
+    """Get config from config file
+
+    :param config_path: Path to the config file
+    :type config_path: str
+    :return: key-value-pairs of the config fields
+    :rtype: dict
+    """ 
+    with open(config_path, 'r') as config_file:
+        return json.load(config_file)
 
 
-def get_data_collector_instance(args):
+def get_data_collector_instance(args, config):
+    """Get the instance of the data 
+
+    :param args: arguments of the script
+    :type args: Namespace
+    :raises NotImplementedError: no data collector implemented for given data source
+    :return: instance of the specific data collector
+    :rtype: subclass of BaseDataCollector
+    """
     if args.data_source == DATA_SOURCE_RSS:
-        return RssDataCollector(args.base_url)
+        return RssDataCollector(args.base_url, config[CONFIG_RSS_HEADER])
     elif args.data_source == DATA_SOURCE_REDDIT: 
         return RedditDataCollector()
     elif args.data_source == DATA_SOURCE_TWITTER:

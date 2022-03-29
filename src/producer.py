@@ -6,7 +6,7 @@ from constants import PRODUCER_API_VERSION
 
 class Producer(object):
     """Wrapper for a Kafka Producer
-    :param host: Hostname of the bootstrap server
+    :param host: hostname of the bootstrap server
     :type host: str
     :param port: Port of the bootstrap server
     :type port: str
@@ -21,12 +21,11 @@ class Producer(object):
             print(str(ex))
     
     def publish(self, topic, message):
-        """
-        Publish a message in the Kafka Broker
+        """Publish a message in the Kafka Broker
 
         :param topic: topic where the message will be published
         :type topic: str
-        :param message: The value of the message
+        :param message: the value of the message
         :type message: str
         :raises KafkaTimeoutError: timeout when sending message or flushing the buffer
         """
