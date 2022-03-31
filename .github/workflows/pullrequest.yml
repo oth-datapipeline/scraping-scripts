@@ -1,6 +1,7 @@
 name: Sonar Scan & Quality Checks on PR
 
 on:
+  workflow_dispatch:   # Allows for manually triggering pipeline
   push:
     branches:
       - master
