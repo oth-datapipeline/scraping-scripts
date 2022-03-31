@@ -24,8 +24,4 @@
         "cookie": "blog=true; ru=https://blog.feedspot.com/world_news_rss_feeds/; _ga=GA1.2.1834597446.1648146314; _gid=GA1.2.1086655725.1648146314; _gat=1",
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36"
     }
-, error on purpose on json to check sonar!!!,
-!!!!
-,
-
 }
