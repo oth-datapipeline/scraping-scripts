@@ -9,6 +9,7 @@ from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_KAFKA, 
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer
 
+from kafka import KafkaConsumer
 
 def get_arguments():
     """Get script arguments from the argument parser
@@ -75,6 +76,7 @@ def main():
                 except RequestException as e:
                     logging.error(f'Error in GET-Request: {e}')
                     continue
+
 
 
 if __name__ == '__main__':

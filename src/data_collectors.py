@@ -57,7 +57,8 @@ class RssDataCollector(BaseDataCollector):
         html_tags = re.findall(pattern, response.text)
         html_tags_string = "".join(html_tags)
         filtered_tags = list(filter(lambda tag: "href" in tag, html_tags_string.split(" ")))
-        rss_urls = list(map(lambda tag: re.search('href="(.*)"', tag).group(1), filtered_tags))
+        rss_urls = list(map(lambda tag: re.search('href="(.*?)"', tag).group(1), filtered_tags))
+        rss_urls = list(filter(lambda link: len(link) > 0, rss_urls))
         return rss_urls
 
 
