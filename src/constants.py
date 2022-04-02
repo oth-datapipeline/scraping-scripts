@@ -16,5 +16,6 @@ PRODUCER_API_VERSION = (0, 10)
 
 # Constants for data collector classes
 TIMEOUT_RSS_REQUEST = 5
-
+FEED_ENTRY_REGEX = r'<a class="ext" .*?>.*?</a>'
+FEED_URL_REGEX = r'href="(http.+?)"'
 

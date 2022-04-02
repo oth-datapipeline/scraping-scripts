@@ -2,7 +2,7 @@ import abc
 import re
 import requests
 
-from constants import TIMEOUT_RSS_REQUEST
+from constants import FEED_ENTRY_REGEX, FEED_URL_REGEX, TIMEOUT_RSS_REQUEST
 from helper import get_request_with_timeout
 
 
@@ -52,13 +52,13 @@ class RssDataCollector(BaseDataCollector):
 
     def _get_feed_urls(self):
         headers = self.request_headers
-        response = requests.get(self.base_url, headers=headers)
-        pattern = '<a class="ext" .*?>.*?<\/a>'
-        html_tags = re.findall(pattern, response.text)
-        html_tags_string = "".join(html_tags)
-        filtered_tags = list(filter(lambda tag: "href" in tag, html_tags_string.split(" ")))
-        rss_urls = list(map(lambda tag: re.search('href="(.*?)"', tag).group(1), filtered_tags))
-        rss_urls = list(filter(lambda link: len(link) > 0, rss_urls))
+        site_content = requests.get(self.base_url, headers=headers)
+        feed_entries = re.findall(FEED_ENTRY_REGEX, site_content.text)
+
+        rss_urls = []
+        for feed_entry in feed_entries:
+            url = re.search(FEED_URL_REGEX, feed_entry)
+            rss_urls.append(url.group(1)) if url else None
         return rss_urls
 
 
