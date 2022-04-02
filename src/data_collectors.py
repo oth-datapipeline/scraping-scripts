@@ -9,6 +9,7 @@ from helper import get_request_with_timeout
 class BaseDataCollector(object):
     """Base class for data collectors from different data sources
     """
+
     def __init__(self):
         pass
 
@@ -32,13 +33,14 @@ class RssDataCollector(BaseDataCollector):
     :param request_headers: Header fields for the GET request
     :type request_headers: dict
     """
+
     def __init__(self, base_url, request_headers):
         super().__init__()
         self.base_url = base_url
         self.request_headers = request_headers
-    
+
     def get_data_collection_futures(self, executor):
-        """Get futures where data is collected from RSS feeds 
+        """Get futures where data is collected from RSS feeds
 
         :param executor: Executor where the futures are submitted to
         :type executor: concurrent.futures.Executor
@@ -47,22 +49,25 @@ class RssDataCollector(BaseDataCollector):
         """
         feed_urls = self._get_feed_urls()
         get_request = get_request_with_timeout(TIMEOUT_RSS_REQUEST)
-        futures = list(map(lambda url: executor.submit(get_request, url), feed_urls))
+        futures = list(
+            map(lambda url: executor.submit(get_request, url), feed_urls))
         return futures
 
     def _get_feed_urls(self):
         headers = self.request_headers
         response = requests.get(self.base_url, headers=headers)
-        pattern = '<a class="ext" .*?>.*?<\/a>'
+        pattern = '<a class="ext" .*?>.*?<\\/a>'
         html_tags = re.findall(pattern, response.text)
         html_tags_string = "".join(html_tags)
-        filtered_tags = list(filter(lambda tag: "href" in tag, html_tags_string.split(" ")))
-        rss_urls = list(map(lambda tag: re.search('href="(.*?)"', tag).group(1), filtered_tags))
+        filtered_tags = list(
+            filter(lambda tag: "href" in tag, html_tags_string.split(" ")))
+        rss_urls = list(map(lambda tag: re.search(
+            'href="(.*?)"', tag).group(1), filtered_tags))
         rss_urls = list(filter(lambda link: len(link) > 0, rss_urls))
         return rss_urls
 
 
-class RedditDataCollector(BaseDataCollector): 
+class RedditDataCollector(BaseDataCollector):
     def __init__(self):
         super().__init__()
 
@@ -78,12 +83,12 @@ class RedditDataCollector(BaseDataCollector):
         pass
 
 
-class TwitterDataCollector(BaseDataCollector): 
+class TwitterDataCollector(BaseDataCollector):
     def __init__(self):
         super().__init__()
 
     def get_data_collection_futures(self, executor):
-        """Get futures where data is collected from Twitter 
+        """Get futures where data is collected from Twitter
 
         :param executor: Executor where the futures are submitted to
         :type executor: concurrent.futures.Executor

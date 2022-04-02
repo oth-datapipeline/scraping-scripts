@@ -16,5 +16,3 @@ PRODUCER_API_VERSION = (0, 10)
 
 # Constants for data collector classes
 TIMEOUT_RSS_REQUEST = 5
-
-

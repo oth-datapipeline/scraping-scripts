@@ -1,6 +1,7 @@
 import requests
 import feedparser
 
+
 def get_request_with_timeout(timeout):
     """Wrapper for a GET-request with a timeout
 
@@ -11,6 +12,7 @@ def get_request_with_timeout(timeout):
         return requests.get(url, timeout=timeout)
     return get_request
 
+
 def split_rss_feed(full_feed):
     """Function for splitting a raw RSS-Feed into single documents
 
@@ -18,5 +20,6 @@ def split_rss_feed(full_feed):
     :type full_feed: str
     """
     parsed = feedparser.parse(full_feed)
-    entries_with_source = list(map(lambda entry: {**dict(entry),**{"feed_source": parsed.feed.title}}, parsed.entries))
+    entries_with_source = list(map(lambda entry: {
+                               **dict(entry), **{"feed_source": parsed.feed.title}}, parsed.entries))
     return entries_with_source
