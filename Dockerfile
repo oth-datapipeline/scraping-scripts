@@ -6,10 +6,9 @@
 
 FROM python:3.9-slim-bullseye AS base
 
-WORKDIR /scraping_scripts
-
-RUN python -m venv /opt/venv
-ENV PATH="opt/venv/bin:$PATH"
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 COPY requirements.txt ./requirements.txt
 
@@ -19,12 +18,13 @@ RUN pip install -r requirements.txt
 # setup of the into actual runner image
 
 FROM python:3.9-slim-bullseye AS runner
+ENV VIRTUAL_ENV=/opt/venv
 ARG scraper_type
 ARG base_url
-WORKDIR /scraping_scripts
+WORKDIR /scraping_scripts/
 
 # copy venv and its dependencies from the base image and enable venv
-COPY --from=base /opt/venv /opt/venv
+COPY --from=base $VIRTUAL_ENV $VIRTUAL_ENV
 ENV PATH="/opt/venv/bin:$PATH"
 
 # the entire repository is not necessary
@@ -33,11 +33,12 @@ COPY config.json ./config.json
 COPY src/ ./src/
 
 # check for entirety of required files
-RUN ls -a
-RUN ls -a src/
+#RUN ls -a
+#RUN ls -a src/
+#RUN cd .. && ls -a
 
 # check for running vevn
-RUN which python
+#RUN which python
 
 # run on executing container
-CMD python -m --config="config.json" "$scraper_type" --base_url="$base_url"
+CMD python3 src/data_collection.py --config=config.json "$scraper_type" --base_url=$base_url
