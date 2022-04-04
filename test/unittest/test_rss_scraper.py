@@ -1,11 +1,17 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", "src"))
-from data_collectors import RssDataCollector
+import requests_mock
+
+sys.path.insert(0, os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", ".."))
+from src.data_collectors import RssDataCollector
+from src.helper import split_rss_feed
+
+from test_data import expected_parsed_feed
 
 TEST_DATA_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
 PATH_FEED_DATABASE = os.path.join(TEST_DATA_FOLDER, 'example_feed_database.html')
+PATH_RAW_FEED = os.path.join(TEST_DATA_FOLDER, 'raw_feed.xml')
 
 
 TEST_CONFIG_RSS_REQUEST_HEADERS = {
@@ -24,6 +30,7 @@ TEST_CONFIG_RSS_REQUEST_HEADERS = {
         "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36"
     }
 
+@requests_mock.Mocker()
 def test_get_feed_urls(requests_mock):
     base_url = 'http://test.com'
     with open(PATH_FEED_DATABASE, encoding='utf-8') as html_file:  
@@ -32,3 +39,8 @@ def test_get_feed_urls(requests_mock):
     rss_data_collector = RssDataCollector(base_url=base_url, request_headers=TEST_CONFIG_RSS_REQUEST_HEADERS)
     feeds = rss_data_collector._get_feed_urls()
     assert len(feeds) == 5
+
+def test_split_rss_feeds(): 
+    with open(PATH_RAW_FEED) as raw_feed_file:
+        parsed_feed = split_rss_feed(raw_feed_file.read())
+        assert expected_parsed_feed.FEED_ENTRIES == parsed_feed
