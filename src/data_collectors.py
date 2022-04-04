@@ -1,6 +1,8 @@
 import abc
 import re
 import requests
+import tweepy
+import json
 
 from constants import TIMEOUT_RSS_REQUEST
 from helper import get_request_with_timeout
@@ -79,8 +81,11 @@ class RedditDataCollector(BaseDataCollector):
 
 
 class TwitterDataCollector(BaseDataCollector): 
-    def __init__(self):
+    def __init__(self, consumer_key, consumer_secret, bearer_token):
         super().__init__()
+        auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret)
+        self._API = tweepy.API(auth) # from Twitter APIv1.1
+        self._CLIENT = tweepy.Client(bearer_token) # from Twitter APIv2
 
     def get_data_collection_futures(self, executor):
         """Get futures where data is collected from Twitter 
@@ -90,5 +95,61 @@ class TwitterDataCollector(BaseDataCollector):
         :return futures: futures
         :rtype: concurrent.futures.Future
         """
-        # TODO: Implement logic for Twitter
-        pass
+        trending_locations = self._get_trending_locations()
+        queries = self._get_trending_topics(trending_locations)
+        futures = list(map(lambda query: executor.submit(self._process_query, query), queries))
+        return futures
+
+    def _get_trending_locations(self):
+        trending_locations = set()
+        # Worldwide
+        trending_locations.add(1)
+        # Germany
+        trending_locations.add(23424829)
+        # Nearby to Regensburg
+        lat_rgb = 49.1
+        long_rgb = 12.6
+        locations = self._API.closest_trends(lat_rgb, long_rgb)
+        for location in locations:
+            trending_locations.add(location['woeid'])
+        return list(trending_locations)
+
+    def _get_trending_topics(self, place_ids):
+        queries = set()
+        for place_id in place_ids:
+            # The exclusion of hashtags might lead to a bit more serious collection of the latest news topics
+            results = self._API.get_place_trends(place_id, exclude='hashtags')[0]
+            for trend in results['trends']:
+                queries.add(trend['query'])
+        return list(queries)
+
+    def _process_query(self, query):
+        # Refine the query with additional statements
+        query += ' -is:retweet -is:reply is:verified (lang:en OR lang:de)'
+
+        # Search Tweets request to the Twitter APIv2
+        tweets = self._CLIENT.search_recent_tweets(query,
+            tweet_fields=['text', 'created_at', 'lang', 'geo'],
+            expansions=['geo.place_id'],
+            max_results=100)
+
+        # Get places list from the includes object
+        places = {}
+        if 'places' in tweets.includes:
+            places = {place.id: place.full_name for place in tweets.includes['places']}
+
+        # Build results dict
+        results = {}
+        for tweet in tweets.data:
+            place = ''
+            if tweet.geo:
+                place = places[tweet.geo['place_id']]
+            results[tweet.id] = {
+                'text': tweet.text,
+                'created_at': str(tweet.created_at),
+                'lang': tweet.lang,
+                'place': place
+            }
+        
+        # Stringify results dict
+        return json.dumps(results)
