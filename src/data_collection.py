@@ -72,7 +72,9 @@ def main():
                     message = future.result().text
                     producer.publish(args.data_source, message)
                 except RequestException as e:
-                    logging.error(f'Error in GET-Request: {e}')
+                    logging.warning(f'Error in GET-Request: {e}')
+                    continue
+                except Exception as e:
                     continue
 
 

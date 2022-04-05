@@ -8,7 +8,11 @@ def get_request_with_timeout(timeout):
     :type timeout: int
     """
     def get_request(url):
-        return requests.get(url, timeout=timeout)
+        try:
+            res = requests.get(url, timeout=timeout)
+        except Exception(e):
+            res = None
+        return res 
     return get_request
 
 def split_rss_feed(full_feed):
