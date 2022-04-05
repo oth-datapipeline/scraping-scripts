@@ -32,7 +32,7 @@ TEST_CONFIG_RSS_REQUEST_HEADERS = {
 
 @requests_mock.Mocker(kw='mocked_request')
 def test_get_feed_urls(**kwargs):
-    base_url = 'http://test.com'
+    base_url = 'https://test.com'
     with open(PATH_FEED_DATABASE, encoding='utf-8') as html_file:
         response = html_file.read()
         kwargs['mocked_request'].get(base_url, text=response)

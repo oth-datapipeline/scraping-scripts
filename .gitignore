@@ -1,3 +1,6 @@
+# Files from IDEs
+.vscode/
+
 # Dotfiles that don't belong in the repo
 .DS_Store
 
