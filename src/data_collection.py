@@ -5,7 +5,8 @@ import logging
 from requests.exceptions import RequestException
 
 from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_KAFKA, CONFIG_KAFKA_HOST, \
-    CONFIG_KAFKA_PORT, CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER
+    CONFIG_KAFKA_PORT, CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
+    CONFIG_REDDIT_CLIENT_ID, CONFIG_REDDIT_CLIENT_SECRET
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer
 
@@ -44,7 +45,8 @@ def get_data_collector_instance(args, config):
     if args.data_source == DATA_SOURCE_RSS:
         return RssDataCollector(args.base_url, config[CONFIG_RSS_HEADER])
     elif args.data_source == DATA_SOURCE_REDDIT: 
-        return RedditDataCollector()
+        return RedditDataCollector(config[CONFIG_REDDIT_CLIENT_ID],
+                                   config[CONFIG_REDDIT_CLIENT_SECRET])
     elif args.data_source == DATA_SOURCE_TWITTER:
         return TwitterDataCollector()
     else:

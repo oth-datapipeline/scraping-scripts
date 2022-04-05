@@ -5,6 +5,8 @@ CONFIG_KAFKA_PORT = 'Port'
 CONFIG_GENERAL = 'General'
 CONFIG_GENERAL_MAX_WORKERS = 'MaxWorkers'
 CONFIG_RSS_HEADER = 'RssHeader'
+CONFIG_REDDIT_CLIENT_ID = 'RedditClientId'
+CONFIG_REDDIT_CLIENT_SECRET = 'RedditClientSecret'
 
 # Constants for argument parser
 DATA_SOURCE_RSS = 'rss'
