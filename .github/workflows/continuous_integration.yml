@@ -2,11 +2,11 @@ name: Run tests
 
 on: 
   push: 
-    -branches: 
+    branches: 
       - master
       - develop
   pull_request:
-    -branches: 
+    branches: 
       - master
       - develop
 

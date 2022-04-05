@@ -50,7 +50,6 @@ class Producer(object):
         :raises KafkaTimeoutError: timeout when sending message or flushing the buffer
         """
         messages = split_rss_feed(raw_feed)
-        print(messages[0].keys())
         for message in messages:
             key = bytes(str(uuid.uuid4()), encoding='utf-8')
             value_bytes = bytes(json.dumps(message), encoding='utf-8')
