@@ -5,8 +5,8 @@
 
 ,
     "Kafka": {
-        "Host": "localhost",
-        "Port": 9092
+        "Host": "broker",
+        "Port": 29092
     }
 ,
     "RssHeader": {

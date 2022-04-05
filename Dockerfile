@@ -33,12 +33,8 @@ COPY config.json ./config.json
 COPY src/ ./src/
 
 # check for entirety of required files
-#RUN ls -a
-#RUN ls -a src/
-#RUN cd .. && ls -a
+RUN ls -a
+RUN ls -a src/
 
 # check for running vevn
-#RUN which python
-
-# run on executing container
-CMD python3 src/data_collection.py --config=config.json "$scraper_type" --base_url=$base_url
+RUN which python
