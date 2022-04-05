@@ -20,6 +20,4 @@ def split_rss_feed(full_feed):
     :type full_feed: str
     """
     parsed = feedparser.parse(full_feed)
-    entries_with_source = list(map(lambda entry: {
-                               **dict(entry), **{"feed_source": parsed.feed.title}}, parsed.entries))
-    return entries_with_source
+    return [dict(entry, **{"feed_source": parsed.feed.title}) for entry in parsed.entries]
