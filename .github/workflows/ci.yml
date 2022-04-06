@@ -1,7 +1,7 @@
 name: Scraper CI/CD
 
 on:
-  workflow_dispatch:   # Allows for manually triggering pipeline
+  workflow_dispatch:  # Allows for manually triggering pipeline
   push:
     branches:
       - master
@@ -55,7 +55,7 @@ jobs:
       - name: Execute tests with pytest
         run: pytest test
 
-  if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master'  # only build docker image on push to master/develop
+  if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master'  # Only build docker image on push to master/develop
   dockerBuild:
     name: Build docker image
     needs: [test]
@@ -69,11 +69,11 @@ jobs:
           registry: '${{ env.REGISTRY }}'
           username: '${{ github.actor }}'
           password: '${{ secrets.GITHUB_TOKEN }}'
-      - name: Set tag LATEST
-        if: ${{ github.ref == 'refs/heads/master' }}
+      - name: Set tag LATEST  # Set tag based on branch
+        if: github.ref == 'refs/heads/master'
         run: echo 'TAG=latest' >> $GITHUB_ENV
       - name: Set tag DEVELOP
-        if: ${{ github.ref == 'refs/heads/develop' }}
+        if: github.ref == 'refs/heads/develop'
         run: echo 'TAG=develop' >> $GITHUB_ENV
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
