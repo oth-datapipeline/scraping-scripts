@@ -1,23 +1,48 @@
-name: Run tests
+name: Scraper CI/CD
 
-on: 
-  push: 
-    branches: 
+on:
+  workflow_dispatch:   # Allows for manually triggering pipeline
+  push:
+    branches:
       - master
       - develop
   pull_request:
-    branches: 
-      - master
-      - develop
+    types: [opened, synchronize, reopened]
+  env:
+   REGISTRY: ghcr.io
+   IMAGE_NAME: '${{ github.repository }}'
 
 jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Run SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.organization=oth-datapipeline
+            -Dsonar.projectKey=oth-datapipeline_scraping-scripts
+            -Dsonar.sources=.
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.python.version=3.7,3.8,3.9,3.10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   test:
+    name: Run unit tests
+    needs: [sonarcloud]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v2
       - name: Install Python 3
         uses: actions/setup-python@v1
@@ -29,3 +54,30 @@ jobs:
           pip install -r requirements.txt
       - name: Execute tests with pytest
         run: pytest test
+
+  if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master'  # only build docker image on push to master/develop
+  dockerBuild:
+    name: Build docker image
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: '${{ env.REGISTRY }}'
+          username: '${{ github.actor }}'
+          password: '${{ secrets.GITHUB_TOKEN }}'
+      - name: Set tag LATEST
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: echo 'TAG=latest' >> $GITHUB_ENV
+      - name: Set tag DEVELOP
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        run: echo 'TAG=develop' >> $GITHUB_ENV
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: >-
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
