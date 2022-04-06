@@ -8,9 +8,10 @@ on:
       - develop
   pull_request:
     types: [opened, synchronize, reopened]
-  env:
-   REGISTRY: ghcr.io
-   IMAGE_NAME: '${{ github.repository }}'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: '${{ github.repository }}'
 
 jobs:
   sonarcloud:
