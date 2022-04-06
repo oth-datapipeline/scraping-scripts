@@ -5,7 +5,8 @@ import logging
 from requests.exceptions import RequestException
 
 from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_KAFKA, CONFIG_KAFKA_HOST, \
-    CONFIG_KAFKA_PORT, CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER
+    CONFIG_KAFKA_PORT, CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
+    CONFIG_TWITTER_CONSUMER_KEY, CONFIG_TWITTER_CONSUMER_SECRET, CONFIG_TWITTER_BEARER_TOKEN
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer
 
@@ -51,7 +52,9 @@ def get_data_collector_instance(args, config):
     elif args.data_source == DATA_SOURCE_REDDIT:
         return RedditDataCollector()
     elif args.data_source == DATA_SOURCE_TWITTER:
-        return TwitterDataCollector()
+        return TwitterDataCollector(config[CONFIG_TWITTER_CONSUMER_KEY],
+                                    config[CONFIG_TWITTER_CONSUMER_SECRET],
+                                    config[CONFIG_TWITTER_BEARER_TOKEN])
     else:
         raise NotImplementedError
 

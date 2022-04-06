@@ -3,3 +3,4 @@ kafka-python~=2.0.2
 pytest~=7.1.1
 requests~=2.27.1
 requests-mock~=1.9.3
+tweepy==4.8.0
