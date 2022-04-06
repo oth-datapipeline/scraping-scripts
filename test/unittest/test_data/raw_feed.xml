@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>\r\n'
+<?xml-stylesheet type="text/xsl" media="screen" ' 'href="/~d/styles/rss2full.xsl"?><?xml-stylesheet type="text/css" ' 'media="screen" href="http://rss.cnn.com/~d/styles/itemcontent.css"?>
+<rss ' 'xmlns:dc="http://purl.org/dc/elements/1.1/" ' 'xmlns:content="http://purl.org/rss/1.0/modules/content/" ' 'xmlns:atom="http://www.w3.org/2005/Atom" ' 'xmlns:media="http://search.yahoo.com/mrss/" ' 'version="2.0">
+<channel>
+<title><![CDATA[CNN.com - RSS Channel - World]]></title>
+<description><![CDATA[CNN.com delivers up-to-the-minute news and information on the latest top stories, weather, entertainment, politics and more.]]></description>
+<link>https://www.cnn.com/world/index.html</link>
+<image>
+<url>http://i2.cdn.turner.com/cnn/2015/images/09/24/cnn.digital.png</url>
+<title>CNN.com - RSS Channel - World</title>
+<link>https://www.cnn.com/world/index.html</link>
+</image>
+<generator>coredev-bumblebee</generator>
+<lastBuildDate>Mon, 04 Apr 2022 08:19:06 GMT</lastBuildDate>
+<pubDate>Fri, 01 Apr 2022 21:21:05 GMT</pubDate>
+<copyright><![CDATA[Copyright (c) 2022 Turner Broadcasting System, Inc. All Rights Reserved.]]></copyright>
+<language><![CDATA[en-US]]></language>
+<ttl>10</ttl>
+<atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="self" ' 'type="application/rss+xml" href="http://rss.cnn.com/rss/edition_world"/>
+<feedburner:info ' 'xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0" ' 'uri="rss/edition_world" />
+<atom10:link ' 'xmlns:atom10="http://www.w3.org/2005/Atom" rel="hub" ' 'href="http://pubsubhubbub.appspot.com/" />
+
+<item>
+   <title><![CDATA[Pakistan Prime Minister Imran Khan calls for early election after no-confidence vote dismissed]]></title>
+   <description><![CDATA[Imran Khan survived an attempt to oust him as Pakistan's prime minister on Sunday, after a no-confidence vote was blocked in parliament by the deputy speaker.]]></description>
+   <link>https://www.cnn.com/2022/04/03/asia/pakistan-imran-khan-early-elections-intl-hnk/index.html</link>
+   <guid ' 'isPermaLink="true">https://www.cnn.com/2022/04/03/asia/pakistan-imran-khan-early-elections-intl-hnk/index.html</guid>
+<pubDate>Mon, 04 Apr 2022 02:56:19 GMT</pubDate>
+<media:group>
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-super-169.jpg" ' 'height="619" width="1100" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-large-11.jpg" ' 'height="300" width="300" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-vertical-large-gallery.jpg" ' 'height="552" width="414" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-video-synd-2.jpg" ' 'height="480" width="640" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-live-video.jpg" ' 'height="324" width="576" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-t1-main.jpg" ' 'height="250" width="250" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-vertical-gallery.jpg" ' 'height="360" width="270" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-story-body.jpg" ' 'height="169" width="300" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-t1-main.jpg" ' 'height="250" width="250" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-assign.jpg" ' 'height="186" width="248" type="image/jpeg" />
+<media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220323004310-imran-khan-oic-speak-032222-hp-video.jpg" ' 'height="144" width="256" type="image/jpeg" /></media:group></item>
+
+<item><title><![CDATA[Sri Lanka is in economic crisis. Here's what it's like on the ground ]]></title
+><description><![CDATA[For three straight nights last week, Upul took to the streets of Sri Lanka's capital city holding a candle or a placard as he protested the country's worst economic crisis in decades. "]]></description>
+<link>https://www.cnn.com/2022/04/02/asia/sri-lanka-economic-crisis-protests-intl-hnk-dst/index.html</link>
+<guid ' 'isPermaLink="true">https://www.cnn.com/2022/04/02/asia/sri-lanka-economic-crisis-protests-intl-hnk-dst/index.html</guid>
+   <pubDate>Sun, 03 Apr 2022 06:09:52 GMT</pubDate>
+   <media:group>
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-super-169.jpg" ' 'height="619" width="1100" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-large-11.jpg" ' 'height="300" width="300" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-vertical-large-gallery.jpg" ' 'height="552" width="414" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-video-synd-2.jpg" ' 'height="480" width="640" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-live-video.jpg" ' 'height="324" width="576" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-t1-main.jpg" ' 'height="250" width="250" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-vertical-gallery.jpg" ' 'height="360" width="270" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-story-body.jpg" ' 'height="169" width="300" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-t1-main.jpg" ' 'height="250" width="250" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-assign.jpg" ' 'height="186" width="248" type="image/jpeg" />
+      <media:content medium="image" ' 'url="https://cdn.cnn.com/cnnnext/dam/assets/220331175215-01-sri-lanka-protests-0331-hp-video.jpg" ' 'height="144" width="256" type="image/jpeg" ''/></media:group></item>
+</channel></rss>
