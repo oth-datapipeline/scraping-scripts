@@ -56,11 +56,11 @@ jobs:
       - name: Execute tests with pytest
         run: pytest test
 
-  if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master'  # Only build docker image on push to master/develop
   dockerBuild:
     name: Build docker image
     needs: [test]
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master'  # Only build docker image on push to master/develop
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
