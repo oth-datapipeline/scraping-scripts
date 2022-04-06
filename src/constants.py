@@ -5,6 +5,9 @@ CONFIG_KAFKA_PORT = 'Port'
 CONFIG_GENERAL = 'General'
 CONFIG_GENERAL_MAX_WORKERS = 'MaxWorkers'
 CONFIG_RSS_HEADER = 'RssHeader'
+CONFIG_TWITTER_CONSUMER_KEY = 'TwitterConsumerKey'
+CONFIG_TWITTER_CONSUMER_SECRET = 'TwitterConsumerSecret'
+CONFIG_TWITTER_BEARER_TOKEN = 'TwitterBearerToken'
 
 # Constants for argument parser
 DATA_SOURCE_RSS = 'rss'
@@ -18,4 +21,3 @@ PRODUCER_API_VERSION = (0, 10)
 TIMEOUT_RSS_REQUEST = 5
 FEED_ENTRY_REGEX = r'<a class="ext" .*?>.*?</a>'
 FEED_URL_REGEX = r'href="(http.+?)"'
-
