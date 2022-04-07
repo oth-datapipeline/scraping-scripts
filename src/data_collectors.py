@@ -12,9 +12,6 @@ class BaseDataCollector(object):
     """Base class for data collectors from different data sources
     """
 
-    def __init__(self):
-        pass
-
     @abc.abstractmethod
     def get_data_collection_futures(self, executor):
         """Get futures where the data from the data source is collected
@@ -83,12 +80,12 @@ class RedditDataCollector(BaseDataCollector):
         pass
 
 
-class TwitterDataCollector(BaseDataCollector): 
+class TwitterDataCollector(BaseDataCollector):
     def __init__(self, consumer_key, consumer_secret, bearer_token):
         super().__init__()
         auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret)
-        self._API = tweepy.API(auth) # from Twitter APIv1.1
-        self._CLIENT = tweepy.Client(bearer_token) # from Twitter APIv2
+        self._API = tweepy.API(auth)  # from Twitter APIv1.1
+        self._CLIENT = tweepy.Client(bearer_token)  # from Twitter APIv2
 
     def get_data_collection_futures(self, executor):
         """Get futures where data is collected from Twitter
@@ -132,9 +129,9 @@ class TwitterDataCollector(BaseDataCollector):
 
         # Search Tweets request to the Twitter APIv2
         tweets = self._CLIENT.search_recent_tweets(query,
-            tweet_fields=['text', 'created_at', 'lang', 'geo'],
-            expansions=['geo.place_id'],
-            max_results=100)
+                                                   tweet_fields=['text', 'created_at', 'lang', 'geo'],
+                                                   expansions=['geo.place_id'],
+                                                   max_results=100)
 
         # Get places list from the includes object
         places = {}
@@ -153,6 +150,6 @@ class TwitterDataCollector(BaseDataCollector):
                 'lang': tweet.lang,
                 'place': place
             }
-        
+
         # Stringify results dict
         return json.dumps(results)

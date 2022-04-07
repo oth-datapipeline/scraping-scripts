@@ -18,7 +18,7 @@ class Producer(object):
         """Constructor
         """
         try:
-            self.producer = KafkaProducer(
+            self._producer = KafkaProducer(
                 bootstrap_servers=[f'{host}:{port}'], api_version=PRODUCER_API_VERSION)
         except Exception as ex:
             print('Exception while connecting Kafka')
@@ -39,8 +39,8 @@ class Producer(object):
             key = bytes(str(uuid.uuid4()), encoding='utf-8')
             value_bytes = bytes(message, encoding='utf-8')
             logging.info(f'Publish on topic {topic}: {key}')
-            self.producer.send(topic, key=key, value=value_bytes)
-        self.producer.flush()
+            self._producer.send(topic, key=key, value=value_bytes)
+        self._producer.flush()
 
     def __publish_rss(self, topic, raw_feed):
         """Publish rss articles in the Kafka Broker
@@ -56,4 +56,4 @@ class Producer(object):
             key = bytes(str(uuid.uuid4()), encoding='utf-8')
             value_bytes = bytes(json.dumps(message), encoding='utf-8')
             logging.info(f'Publish on topic {topic}: {key}')
-            self.producer.send(topic, key=key, value=value_bytes)
+            self._producer.send(topic, key=key, value=value_bytes)
