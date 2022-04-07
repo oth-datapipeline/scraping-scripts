@@ -11,6 +11,7 @@ from helper import get_request_with_timeout
 class BaseDataCollector(object):
     """Base class for data collectors from different data sources
     """
+
     def __init__(self):
         pass
 
@@ -34,13 +35,14 @@ class RssDataCollector(BaseDataCollector):
     :param request_headers: Header fields for the GET request
     :type request_headers: dict
     """
+
     def __init__(self, base_url, request_headers):
         super().__init__()
         self.base_url = base_url
         self.request_headers = request_headers
-    
+
     def get_data_collection_futures(self, executor):
-        """Get futures where data is collected from RSS feeds 
+        """Get futures where data is collected from RSS feeds
 
         :param executor: Executor where the futures are submitted to
         :type executor: concurrent.futures.Executor
@@ -49,7 +51,8 @@ class RssDataCollector(BaseDataCollector):
         """
         feed_urls = self._get_feed_urls()
         get_request = get_request_with_timeout(TIMEOUT_RSS_REQUEST)
-        futures = list(map(lambda url: executor.submit(get_request, url), feed_urls))
+        futures = list(
+            map(lambda url: executor.submit(get_request, url), feed_urls))
         return futures
 
     def _get_feed_urls(self):
@@ -64,7 +67,7 @@ class RssDataCollector(BaseDataCollector):
         return rss_urls
 
 
-class RedditDataCollector(BaseDataCollector): 
+class RedditDataCollector(BaseDataCollector):
     def __init__(self):
         super().__init__()
 
@@ -88,7 +91,7 @@ class TwitterDataCollector(BaseDataCollector):
         self._CLIENT = tweepy.Client(bearer_token) # from Twitter APIv2
 
     def get_data_collection_futures(self, executor):
-        """Get futures where data is collected from Twitter 
+        """Get futures where data is collected from Twitter
 
         :param executor: Executor where the futures are submitted to
         :type executor: concurrent.futures.Executor

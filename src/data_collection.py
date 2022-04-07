@@ -10,14 +10,19 @@ from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_KAFKA, 
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer
 
+
 def get_arguments():
     """Get script arguments from the argument parser
     """
-    parser = argparse.ArgumentParser(description='Script for collecting data from different data sources and publishing it to a Kafka broker')
-    parser.add_argument('--config', required=True, help='Configuration file for the data collection script')
+    parser = argparse.ArgumentParser(
+        description='Script for collecting data from different data sources and publishing it to a Kafka broker')
+    parser.add_argument('--config', required=True,
+                        help='Configuration file for the data collection script')
     subparsers = parser.add_subparsers(dest='data_source')
-    rss_parser = subparsers.add_parser('rss', help='Scrape data from RSS feeds')
-    rss_parser.add_argument('--base_url', required=True, help='URL of a RSS feed database where links to relevant RSS feeds can be found')
+    rss_parser = subparsers.add_parser(
+        'rss', help='Scrape data from RSS feeds')
+    rss_parser.add_argument('--base_url', required=True,
+                            help='URL of a RSS feed database where links to relevant RSS feeds can be found')
     return parser.parse_args()
 
 
@@ -28,13 +33,13 @@ def get_config(config_path):
     :type config_path: str
     :return: key-value-pairs of the config fields
     :rtype: dict
-    """ 
+    """
     with open(config_path, 'r') as config_file:
         return json.load(config_file)
 
 
 def get_data_collector_instance(args, config):
-    """Get the instance of the data 
+    """Get the instance of the data
 
     :param args: arguments of the script
     :type args: Namespace
@@ -44,7 +49,7 @@ def get_data_collector_instance(args, config):
     """
     if args.data_source == DATA_SOURCE_RSS:
         return RssDataCollector(args.base_url, config[CONFIG_RSS_HEADER])
-    elif args.data_source == DATA_SOURCE_REDDIT: 
+    elif args.data_source == DATA_SOURCE_REDDIT:
         return RedditDataCollector()
     elif args.data_source == DATA_SOURCE_TWITTER:
         return TwitterDataCollector(config[CONFIG_TWITTER_CONSUMER_KEY],
@@ -64,21 +69,22 @@ def main():
     try:
         data_collector = get_data_collector_instance(args, config)
     except NotImplementedError:
-        logging.error(f'Data collection not implemented for data source {args.data_source}')
-    
+        logging.error(
+            f'Data collection not implemented for data source {args.data_source}')
+
     max_workers = int(config[CONFIG_GENERAL][CONFIG_GENERAL_MAX_WORKERS])
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        
-            futures = data_collector.get_data_collection_futures(executor=executor)
-            for future in as_completed(futures):
-                try:
-                    message = future.result().text
-                    producer.publish(args.data_source, message)
-                except RequestException as e:
-                    logging.warning(f'Error in GET-Request: {e}')
-                    continue
-                except Exception as e:
-                    continue
+
+        futures = data_collector.get_data_collection_futures(executor=executor)
+        for future in as_completed(futures):
+            try:
+                message = future.result().text
+                producer.publish(args.data_source, message)
+            except RequestException as e:
+                logging.warning(f'Error in GET-Request: {e}')
+                continue
+            except Exception:
+                continue
 
 
 if __name__ == '__main__':

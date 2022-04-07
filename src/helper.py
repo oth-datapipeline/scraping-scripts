@@ -1,6 +1,7 @@
 import requests
 import feedparser
 
+
 def get_request_with_timeout(timeout):
     """Wrapper for a GET-request with a timeout
 
@@ -10,10 +11,11 @@ def get_request_with_timeout(timeout):
     def get_request(url):
         try:
             res = requests.get(url, timeout=timeout)
-        except Exception(e):
+        except Exception:
             res = None
-        return res 
+        return res
     return get_request
+
 
 def split_rss_feed(full_feed):
     """Function for splitting a raw RSS-Feed into single documents
