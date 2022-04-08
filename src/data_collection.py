@@ -23,6 +23,12 @@ def get_arguments():
         'rss', help='Scrape data from RSS feeds')
     rss_parser.add_argument('--base_url', required=True,
                             help='URL of a RSS feed database where links to relevant RSS feeds can be found')
+    twitter_parser = subparsers.add_parser(
+        'twitter', help='Collect data from Twitter'
+    )
+    reddit_parser = subparsers.add_parser(
+        'reddit', help='Collect data from Reddit'
+    )
     return parser.parse_args()
 
 
