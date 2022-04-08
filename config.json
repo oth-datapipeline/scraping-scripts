@@ -1,6 +1,7 @@
 {
     "General": {
-        "MaxWorkers": 20
+        "MaxWorkers": 20, 
+        "BaseLoggingDir": "/producers/logs"
     }
 
 ,

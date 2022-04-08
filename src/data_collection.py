@@ -1,14 +1,19 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 import json
 import logging
+import os
+from pymongo import MongoClient
 from requests.exceptions import RequestException
 
-from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_KAFKA, CONFIG_KAFKA_HOST, \
-    CONFIG_KAFKA_PORT, CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
+
+from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_BASE_LOGGING_DIR, CONFIG_KAFKA, \
+    CONFIG_KAFKA_HOST, CONFIG_KAFKA_PORT, CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
     CONFIG_TWITTER_CONSUMER_KEY, CONFIG_TWITTER_CONSUMER_SECRET, CONFIG_TWITTER_BEARER_TOKEN
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
-from producer import Producer
+from producer import Producer 
+from src.helper import build_logging_filepath
 
 
 def get_arguments():
@@ -38,6 +43,26 @@ def get_config(config_path):
         return json.load(config_file)
 
 
+def set_logging_config(args, config):
+    """Sets the basic logging configuration
+
+    :param args: arguments of the script
+    :type args: Namespace
+    :param config: key-value-pairs of the config fields
+    :type config: dict
+    """
+    log_base_dir = config[CONFIG_GENERAL][CONFIG_BASE_LOGGING_DIR]
+    log_dir = os.path.join(log_base_dir, args.data_source)
+    log_filename = f'{datetime.today().strftime("%Y_%m_%d")}.log'
+    log_complete_path = build_logging_filepath(os.path.join(log_dir, log_filename))
+    logging.basicConfig(filename=log_complete_path,
+                        filemode='w',
+                        level=logging.INFO, 
+                        format='%(asctime)s | LEVEL: %(levelname)s | %(message)s', 
+                        datefmt='%Y-%m-%d,%H:%M:%S')
+    return log_complete_path
+
+
 def get_data_collector_instance(args, config):
     """Get the instance of the data
 
@@ -59,9 +84,24 @@ def get_data_collector_instance(args, config):
         raise NotImplementedError
 
 
+def get_job_collection(): 
+    """Get the MongoDB collection which holds the producer jobs
+
+    :return: Object which holds the Mongo collection
+    :rtype: pymongo.collection.Collection
+    """
+    user = os.environ['MONGO_INITDB_ROOT_USERNAME']
+    pw = os.environ['MONGO_INITDB_ROOT_PASSWORD']
+    client = MongoClient("localhost", 27017, username=user, password=pw)
+    db = client['test']
+    return db['producer_job']
+
+
 def main():
+    start_time = datetime.now()
     args = get_arguments()
     config = get_config(args.config)
+    logpath = set_logging_config(args, config)
     kafka_host = config[CONFIG_KAFKA][CONFIG_KAFKA_HOST]
     kafka_port = config[CONFIG_KAFKA][CONFIG_KAFKA_PORT]
     producer = Producer(kafka_host, kafka_port)
@@ -85,6 +125,16 @@ def main():
                 continue
             except Exception:
                 continue
+    
+    end_time = datetime.now()
+    job_collection = get_job_collection()
+    job_metadata = {
+        "start_time": start_time, 
+        "end_time": end_time, 
+        "duration": end_time - start_time,
+        "logfile": logpath
+    }
+    job_collection.insert_one(job_metadata)
 
 
 if __name__ == '__main__':
