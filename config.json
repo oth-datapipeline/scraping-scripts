@@ -1,12 +1,13 @@
 {
     "General": {
-        "MaxWorkers": 20
+        "MaxWorkers": 20, 
+        "LoggingBaseDirectory": "/log"
     }
 
 ,
     "Kafka": {
-        "Host": "localhost", 
-        "Port": 9092
+        "Host": "broker",
+        "Port": 29092
     }
 , 
     "RssHeader": {
