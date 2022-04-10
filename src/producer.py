@@ -5,6 +5,7 @@ import json
 from constants import PRODUCER_API_VERSION
 from helper import split_rss_feed
 
+
 class Producer(object):
     """Wrapper for a Kafka Producer
     :param host: hostname of the bootstrap server
@@ -12,15 +13,17 @@ class Producer(object):
     :param port: Port of the bootstrap server
     :type port: str
     """
+
     def __init__(self, host, port):
         """Constructor
         """
         try:
-            self.producer = KafkaProducer(bootstrap_servers=[f'{host}:{port}'], api_version=PRODUCER_API_VERSION)
+            self._producer = KafkaProducer(
+                bootstrap_servers=[f'{host}:{port}'], api_version=PRODUCER_API_VERSION)
         except Exception as ex:
             print('Exception while connecting Kafka')
             print(str(ex))
-    
+
     def publish(self, topic, message):
         """Publish a message in the Kafka Broker
 
@@ -36,9 +39,8 @@ class Producer(object):
             key = bytes(str(uuid.uuid4()), encoding='utf-8')
             value_bytes = bytes(message, encoding='utf-8')
             logging.info(f'Publish on topic {topic}: {key}')
-            self.producer.send(topic, key=key, value=value_bytes)
-        self.producer.flush()
-        
+            self._producer.send(topic, key=key, value=value_bytes)
+        self._producer.flush()
 
     def __publish_rss(self, topic, raw_feed):
         """Publish rss articles in the Kafka Broker
@@ -54,4 +56,4 @@ class Producer(object):
             key = bytes(str(uuid.uuid4()), encoding='utf-8')
             value_bytes = bytes(json.dumps(message), encoding='utf-8')
             logging.info(f'Publish on topic {topic}: {key}')
-            self.producer.send(topic, key=key, value=value_bytes)
+            self._producer.send(topic, key=key, value=value_bytes)

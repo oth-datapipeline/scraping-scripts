@@ -1,6 +1,7 @@
 import requests
 import feedparser
 
+
 def get_request_with_timeout(timeout):
     """Wrapper for a GET-request with a timeout
 
@@ -8,8 +9,13 @@ def get_request_with_timeout(timeout):
     :type timeout: int
     """
     def get_request(url):
-        return requests.get(url, timeout=timeout)
+        try:
+            res = requests.get(url, timeout=timeout)
+        except Exception:
+            res = None
+        return res
     return get_request
+
 
 def split_rss_feed(full_feed):
     """Function for splitting a raw RSS-Feed into single documents
