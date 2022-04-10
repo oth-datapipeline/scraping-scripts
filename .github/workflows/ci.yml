@@ -26,9 +26,6 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         with:
           args: >
-            -Dsonar.organization=oth-datapipeline
-            -Dsonar.projectKey=oth-datapipeline_scraping-scripts
-            -Dsonar.sources=.
             -Dsonar.qualitygate.wait=true
             -Dsonar.python.version=3.7,3.8,3.9,3.10
         env:
