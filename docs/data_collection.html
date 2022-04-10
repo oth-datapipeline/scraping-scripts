@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module data_collection</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>data_collection</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Csebas%5Cdocuments%5Cstudium%5Cmaster%5Cmin3%5Cpst%5Cscraping-scripts%5Csrc%5Cdata_collection.py">c:\users\sebas\documents\studium\master\min3\pst\scraping-scripts\src\data_collection.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="argparse.html">argparse</a><br>
+</td><td width="25%" valign=top><a href="json.html">json</a><br>
+</td><td width="25%" valign=top><a href="logging.html">logging</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-get_arguments"><strong>get_arguments</strong></a>()</dt><dd><tt>Get&nbsp;script&nbsp;arguments&nbsp;from&nbsp;the&nbsp;argument&nbsp;parser</tt></dd></dl>
+ <dl><dt><a name="-get_config"><strong>get_config</strong></a>(config_path)</dt><dd><tt>Get&nbsp;config&nbsp;from&nbsp;config&nbsp;file<br>
+&nbsp;<br>
+:param&nbsp;config_path:&nbsp;Path&nbsp;to&nbsp;the&nbsp;config&nbsp;file<br>
+:type&nbsp;config_path:&nbsp;str<br>
+:return:&nbsp;key-value-pairs&nbsp;of&nbsp;the&nbsp;config&nbsp;fields<br>
+:rtype:&nbsp;dict</tt></dd></dl>
+ <dl><dt><a name="-get_data_collector_instance"><strong>get_data_collector_instance</strong></a>(args, config)</dt><dd><tt>Get&nbsp;the&nbsp;instance&nbsp;of&nbsp;the&nbsp;data<br>
+&nbsp;<br>
+:param&nbsp;args:&nbsp;arguments&nbsp;of&nbsp;the&nbsp;script<br>
+:type&nbsp;args:&nbsp;Namespace<br>
+:raises&nbsp;NotImplementedError:&nbsp;no&nbsp;data&nbsp;collector&nbsp;implemented&nbsp;for&nbsp;given&nbsp;data&nbsp;source<br>
+:return:&nbsp;instance&nbsp;of&nbsp;the&nbsp;specific&nbsp;data&nbsp;collector<br>
+:rtype:&nbsp;subclass&nbsp;of&nbsp;BaseDataCollector</tt></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>()</dt></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>CONFIG_GENERAL</strong> = 'General'<br>
+<strong>CONFIG_GENERAL_MAX_WORKERS</strong> = 'MaxWorkers'<br>
+<strong>CONFIG_KAFKA</strong> = 'Kafka'<br>
+<strong>CONFIG_KAFKA_HOST</strong> = 'Host'<br>
+<strong>CONFIG_KAFKA_PORT</strong> = 'Port'<br>
+<strong>CONFIG_RSS_HEADER</strong> = 'RssHeader'<br>
+<strong>CONFIG_TWITTER_BEARER_TOKEN</strong> = 'TwitterBearerToken'<br>
+<strong>CONFIG_TWITTER_CONSUMER_KEY</strong> = 'TwitterConsumerKey'<br>
+<strong>CONFIG_TWITTER_CONSUMER_SECRET</strong> = 'TwitterConsumerSecret'<br>
+<strong>DATA_SOURCE_REDDIT</strong> = 'reddit'<br>
+<strong>DATA_SOURCE_RSS</strong> = 'rss'<br>
+<strong>DATA_SOURCE_TWITTER</strong> = 'twitter'</td></tr></table>
+</body></html>
