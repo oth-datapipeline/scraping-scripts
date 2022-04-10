@@ -68,7 +68,7 @@ class RssDataCollector(BaseDataCollector):
 class RedditDataCollector(BaseDataCollector): 
     def __init__(self, client_id, client_secret):
         super().__init__()
-        self._API = praw.Reddit(client_id, client_secret, user_agent='oth-datapipeline')
+        self._API = praw.Reddit(client_id=client_id, client_secret=client_secret, user_agent='oth-datapipeline')
 
     def get_data_collection_futures(self, executor):
         """Get futures where data is collected from Reddit
@@ -77,7 +77,7 @@ class RedditDataCollector(BaseDataCollector):
         :return futures: futures
         :rtype: concurrent.futures.Future
         """
-        subreddits = ['worldnews', 'news', 'europe']
+        subreddits = ['worldnews', 'news', 'europe', 'politics', 'upliftingnews', 'truereddit', 'inthenews', 'nottheonion']
         submissions = self._get_submissions(subreddits)
         futures = list(map(lambda submission: executor.submit(self._process_submission, submission), submissions))
         return futures

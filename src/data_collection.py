@@ -45,8 +45,8 @@ def get_data_collector_instance(args, config):
     if args.data_source == DATA_SOURCE_RSS:
         return RssDataCollector(args.base_url, config[CONFIG_RSS_HEADER])
     elif args.data_source == DATA_SOURCE_REDDIT: 
-        return RedditDataCollector(config[CONFIG_REDDIT_CLIENT_ID],
-                                   config[CONFIG_REDDIT_CLIENT_SECRET])
+        return RedditDataCollector(config["Reddit"][CONFIG_REDDIT_CLIENT_ID],
+                                   config["Reddit"][CONFIG_REDDIT_CLIENT_SECRET])
     elif args.data_source == DATA_SOURCE_TWITTER:
         return TwitterDataCollector()
     else:

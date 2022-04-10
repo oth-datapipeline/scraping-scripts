@@ -1,6 +1,9 @@
 # Files from IDEs
 .vscode/
 
+# Config 
+.config.json
+
 # Dotfiles that don't belong in the repo
 .DS_Store
 
