@@ -7,10 +7,9 @@ import os
 from pymongo import MongoClient
 from requests.exceptions import RequestException
 
-
-from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_BASE_LOGGING_DIR, CONFIG_KAFKA, \
-    CONFIG_KAFKA_HOST, CONFIG_KAFKA_PORT, CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
-    CONFIG_TWITTER_CONSUMER_KEY, CONFIG_TWITTER_CONSUMER_SECRET, CONFIG_TWITTER_BEARER_TOKEN
+from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_KAFKA, CONFIG_KAFKA_HOST, CONFIG_BASE_LOGGING_DIR, \
+    CONFIG_KAFKA_PORT, CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
+    CONFIG_REDDIT_CLIENT_ID, CONFIG_REDDIT_CLIENT_SECRET, CONFIG_TWITTER_CONSUMER_KEY, CONFIG_TWITTER_CONSUMER_SECRET, CONFIG_TWITTER_BEARER_TOKEN
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer 
 from helper import build_logging_filepath
@@ -26,6 +25,10 @@ def get_arguments():
     subparsers = parser.add_subparsers(dest='data_source')
     rss_parser = subparsers.add_parser(
         'rss', help='Scrape data from RSS feeds')
+    reddit_parser = subparsers.add_parser(
+        'reddit', help='Scrape data from reddit')
+    twitter_parser = subparsers.add_parser(
+        'twitter', help='Scrape data from twitter')
     rss_parser.add_argument('--base_url', required=True,
                             help='URL of a RSS feed database where links to relevant RSS feeds can be found')
     return parser.parse_args()
@@ -74,12 +77,13 @@ def get_data_collector_instance(args, config):
     """
     if args.data_source == DATA_SOURCE_RSS:
         return RssDataCollector(args.base_url, config[CONFIG_RSS_HEADER])
-    elif args.data_source == DATA_SOURCE_REDDIT:
-        return RedditDataCollector()
+    elif args.data_source == DATA_SOURCE_REDDIT: 
+        return RedditDataCollector(config["Reddit"][CONFIG_REDDIT_CLIENT_ID],
+                                   config["Reddit"][CONFIG_REDDIT_CLIENT_SECRET])
     elif args.data_source == DATA_SOURCE_TWITTER:
-        return TwitterDataCollector(config[CONFIG_TWITTER_CONSUMER_KEY],
-                                    config[CONFIG_TWITTER_CONSUMER_SECRET],
-                                    config[CONFIG_TWITTER_BEARER_TOKEN])
+        return TwitterDataCollector(config["Twitter"][CONFIG_TWITTER_CONSUMER_KEY],
+                                    config["Twitter"][CONFIG_TWITTER_CONSUMER_SECRET],
+                                    config["Twitter"][CONFIG_TWITTER_BEARER_TOKEN])
     else:
         raise NotImplementedError
 
@@ -118,7 +122,11 @@ def main():
         futures = data_collector.get_data_collection_futures(executor=executor)
         for future in as_completed(futures):
             try:
-                message = future.result().text
+                response = future.result()
+                if(isinstance(response, str)):
+                    message = response
+                else:
+                    message = future.result().text
                 producer.publish(args.data_source, message)
             except RequestException as e:
                 logging.warning(f'Error in GET-Request: {e}')

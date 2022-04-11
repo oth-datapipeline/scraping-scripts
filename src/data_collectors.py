@@ -1,8 +1,10 @@
 import abc
 import re
 import requests
+import praw
 import tweepy
 import json
+from datetime import datetime
 
 from constants import FEED_ENTRY_REGEX, FEED_URL_REGEX, TIMEOUT_RSS_REQUEST
 from helper import get_request_with_timeout
@@ -65,19 +67,60 @@ class RssDataCollector(BaseDataCollector):
 
 
 class RedditDataCollector(BaseDataCollector):
-    def __init__(self):
+    def __init__(self, client_id, client_secret):
         super().__init__()
+        self._API = praw.Reddit(client_id=client_id, client_secret=client_secret, user_agent='oth-datapipeline')
 
     def get_data_collection_futures(self, executor):
         """Get futures where data is collected from Reddit
-
         :param executor: Executor where the futures are submitted to
         :type executor: concurrent.futures.Executor
         :return futures: futures
         :rtype: concurrent.futures.Future
         """
-        # TODO: Implement logic for Reddit
-        pass
+        subreddits = ['worldnews', 'news', 'europe', 'politics', 'upliftingnews', 'truereddit', 'inthenews', 'nottheonion']
+        submissions = self._get_submissions(subreddits)
+        futures = list(map(lambda submission: executor.submit(self._process_submission, submission), submissions))
+        return futures
+    
+    def _get_submissions(self, subreddits):
+        query = 'all'
+        if len(subreddits) > 0:
+            query = '+'.join(subreddits)
+        subreddit = self._API.subreddit(query)
+        submissions = subreddit.top('day')
+        return submissions
+    
+    def _process_submission(self, submission):
+        # Fetch the top ten comments
+        submission.comment_sort = 'top'
+        submission.comment_limit = 10
+        submission.comments.replace_more(limit=0)
+        comment_forest = submission.comments.list()
+        
+        # Build up comments list
+        comments = []
+        for comment in comment_forest:
+            comments.append({
+                'text': comment.body,
+                'created': str(datetime.fromtimestamp(comment.created)), # CEST
+                'score': comment.score
+            })
+        
+        # Build result dict
+        result = {
+            'id': submission.id,
+            'title': submission.title,
+            'selftext': submission.selftext,
+            'created': str(datetime.fromtimestamp(submission.created)), # CEST
+            'score': submission.score,
+            'upvote_ratio': submission.upvote_ratio,
+            'domain': submission.domain,
+            'comments': comments
+        }
+        
+        # Stringify result dict
+        return json.dumps(result)
 
 
 class TwitterDataCollector(BaseDataCollector):
