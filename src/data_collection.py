@@ -13,7 +13,7 @@ from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_BASE_LO
     CONFIG_TWITTER_CONSUMER_KEY, CONFIG_TWITTER_CONSUMER_SECRET, CONFIG_TWITTER_BEARER_TOKEN
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer 
-from src.helper import build_logging_filepath
+from helper import build_logging_filepath
 
 
 def get_arguments():
@@ -125,13 +125,13 @@ def main():
                 continue
             except Exception:
                 continue
-    
+
     end_time = datetime.now()
     job_collection = get_job_collection()
     job_metadata = {
-        "start_time": start_time, 
-        "end_time": end_time, 
-        "duration": end_time - start_time,
+        "start_time": start_time,
+        "end_time": end_time,
+        "duration_in_seconds": (end_time - start_time).seconds,
         "logfile": logpath
     }
     job_collection.insert_one(job_metadata)
