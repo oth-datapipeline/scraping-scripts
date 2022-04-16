@@ -78,47 +78,80 @@ class RedditDataCollector(BaseDataCollector):
         :return futures: futures
         :rtype: concurrent.futures.Future
         """
-        subreddits = ['worldnews', 'news', 'europe', 'politics', 'upliftingnews', 'truereddit', 'inthenews', 'nottheonion']
+        subreddits = [
+            'worldnews',
+            'news',
+            'europe',
+            'politics',
+            'convervative',
+            'upliftingnews',
+            'truereddit',
+            'inthenews',
+            'nottheonion']
         submissions = self._get_submissions(subreddits)
         futures = list(map(lambda submission: executor.submit(self._process_submission, submission), submissions))
         return futures
-    
+
     def _get_submissions(self, subreddits):
         query = 'all'
         if len(subreddits) > 0:
             query = '+'.join(subreddits)
         subreddit = self._API.subreddit(query)
-        submissions = subreddit.top('day')
+        submissions = subreddit.hot()
         return submissions
-    
+
+    def _get_author_information(self, *obj):
+        redditor = obj[1].author.stream.redditor
+        return {
+            'name': redditor.name,
+            'member_since': (datetime.now() - datetime.fromtimestamp(redditor.created)).total_seconds(),
+            'karma': {
+                'awardee': redditor.awardee_karma,
+                'awarder': redditor.awarder_karma,
+                'comment': redditor.comment_karma,
+                'link': redditor.link_karma,
+                'total': redditor.total_karma,
+            }
+        }
+
     def _process_submission(self, submission):
-        # Fetch the top ten comments
+        # Fetch the top 20 comments
         submission.comment_sort = 'top'
-        submission.comment_limit = 10
+        submission.comment_limit = 20
         submission.comments.replace_more(limit=0)
         comment_forest = submission.comments.list()
-        
+
         # Build up comments list
         comments = []
         for comment in comment_forest:
             comments.append({
+                'author': self._get_author_information(self, comment),
                 'text': comment.body,
-                'created': str(datetime.fromtimestamp(comment.created)), # CEST
+                'created': str(datetime.fromtimestamp(comment.created)),  # CEST
                 'score': comment.score
             })
-        
+
         # Build result dict
         result = {
             'id': submission.id,
             'title': submission.title,
-            'selftext': submission.selftext,
-            'created': str(datetime.fromtimestamp(submission.created)), # CEST
+            'author': self._get_author_information(self, submission),
+            # 'selftext': submission.selftext, # seems to always be empty, dump it for now
+            'created': str(datetime.fromtimestamp(submission.created)),  # CEST
             'score': submission.score,
             'upvote_ratio': submission.upvote_ratio,
             'domain': submission.domain,
-            'comments': comments
+            'url': submission.url,
+            'reddit': {
+                'subreddit': submission.subreddit.display_name,
+                'url': submission.permalink,
+            },
+            # sort by comment score, start with highest
+            'comments': sorted(comments, key=lambda c: c['score'], reverse=True)
         }
-        
+
+        print(result)
+
         # Stringify result dict
         return json.dumps(result)
 
