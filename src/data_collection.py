@@ -73,8 +73,8 @@ def get_data_collector_instance(args, config):
 def main():
     args = get_arguments()
     config = get_config(args.config)
-    isLocal = os.getenv("SCRAPER_ENV_LOCAL", 'False').lower() in ('true', '1', 't')
-    scraper_env = CONFIG_KAFKA_ENV_LOCAL if isLocal else CONFIG_KAFKA_ENV_DOCKER
+    is_local = os.getenv("SCRAPER_ENV_LOCAL", 'False').lower() in ('true', '1', 't')
+    scraper_env = CONFIG_KAFKA_ENV_LOCAL if is_local else CONFIG_KAFKA_ENV_DOCKER
     kafka_host = config[CONFIG_KAFKA][scraper_env][CONFIG_KAFKA_HOST]
     kafka_port = config[CONFIG_KAFKA][scraper_env][CONFIG_KAFKA_PORT]
     producer = Producer(kafka_host, kafka_port)
