@@ -1,11 +1,8 @@
 from helper import split_rss_feed
 from data_collectors import RssDataCollector
 import os
-import sys
 
 import requests_mock
-
-sys.path.insert(0, os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "..", "src"))
 
 TEST_DATA_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_data")
 PATH_FEED_DATABASE = os.path.join(TEST_DATA_FOLDER, 'example_feed_database.html')
