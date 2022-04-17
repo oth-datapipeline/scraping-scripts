@@ -4,7 +4,9 @@ repos:
     hooks:
     -   id: check-yaml
     -   id: end-of-file-fixer
+        exclude: requirements.txt
     -   id: trailing-whitespace
+        exclude: requirements.txt
 -   repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v1.6.0
     hooks:
