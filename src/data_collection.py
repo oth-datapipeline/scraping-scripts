@@ -22,14 +22,17 @@ def get_arguments():
     parser.add_argument('--config', required=True,
                         help='Configuration file for the data collection script')
     subparsers = parser.add_subparsers(dest='data_source')
+    # rss parser
     rss_parser = subparsers.add_parser(
         'rss', help='Scrape data from RSS feeds')
-    # reddit_parser = subparsers.add_parser(
-    #     'reddit', help='Scrape data from reddit')
-    # twitter_parser = subparsers.add_parser(
-    #     'twitter', help='Scrape data from twitter')
     rss_parser.add_argument('--base_url', required=True,
                             help='URL of a RSS feed database where links to relevant RSS feeds can be found')
+    # reddit parser
+    subparsers.add_parser(
+        'reddit', help='Scrape data from reddit')
+    # twitter parser
+    subparsers.add_parser(
+        'twitter', help='Scrape data from twitter')
     return parser.parse_args()
 
 

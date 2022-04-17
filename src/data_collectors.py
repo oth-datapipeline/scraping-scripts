@@ -83,25 +83,39 @@ class RedditDataCollector(BaseDataCollector):
             'news',
             'europe',
             'politics',
-            'convervative',
+            'liberal',
+            'conservative',
             'upliftingnews',
             'truereddit',
             'inthenews',
             'nottheonion']
-        submissions = self._get_submissions(subreddits)
+
+        submissions = []
+        for subreddit in subreddits:
+            submissions += self._get_submissions(subreddit)
+
         futures = list(map(lambda submission: executor.submit(self._process_submission, submission), submissions))
         return futures
 
-    def _get_submissions(self, subreddits):
-        query = 'all'
-        if len(subreddits) > 0:
-            query = '+'.join(subreddits)
+    def _get_submissions(self, query):
+        """Fetch up to 100 hot submissions of given subreddit
+        :param query: Name of reddit to fetch submissions from
+        :type query: str
+        :return submissions: Fetched submissions
+        :rtype: praw.models.listing.generator.ListingGenerator
+        """
         subreddit = self._API.subreddit(query)
-        submissions = subreddit.hot()
+        submissions = subreddit.hot(limit=100)
         return submissions
 
-    def _get_author_information(self, *obj):
-        redditor = obj[1].author.stream.redditor
+    def _get_author_information(self, obj):
+        """Collects relevant author information of given object
+        :param obj: Source of author information, either submission or comment
+        :type obj: praw.models.reddit.comment.Comment_or_praw.models.reddit.submission.Submission
+        :return: Author information dictionary
+        :rtype: dict
+        """
+        redditor = obj.author.stream.redditor
         return {
             'name': redditor.name,
             'member_since': (datetime.now() - datetime.fromtimestamp(redditor.created)).total_seconds(),
@@ -115,6 +129,14 @@ class RedditDataCollector(BaseDataCollector):
         }
 
     def _process_submission(self, submission):
+        """
+        Processes given submission by extracting up to 20 comments and building a result dictionary
+        consisting of relevant information of the submission and a dict of comments.
+        :param submission: Submission to be processed
+        :type submission: praw.models.reddit.submission.Submission
+        :return: Result dictionary with processed data of given submission
+        :rtype: dict
+        """
         # Fetch the top 20 comments
         submission.comment_sort = 'top'
         submission.comment_limit = 20
@@ -125,7 +147,7 @@ class RedditDataCollector(BaseDataCollector):
         comments = []
         for comment in comment_forest:
             comments.append({
-                'author': self._get_author_information(self, comment),
+                'author': self._get_author_information(comment),
                 'text': comment.body,
                 'created': str(datetime.fromtimestamp(comment.created)),  # CEST
                 'score': comment.score
@@ -135,7 +157,7 @@ class RedditDataCollector(BaseDataCollector):
         result = {
             'id': submission.id,
             'title': submission.title,
-            'author': self._get_author_information(self, submission),
+            'author': self._get_author_information(submission),
             # 'selftext': submission.selftext, # seems to always be empty, dump it for now
             'created': str(datetime.fromtimestamp(submission.created)),  # CEST
             'score': submission.score,
@@ -149,8 +171,6 @@ class RedditDataCollector(BaseDataCollector):
             # sort by comment score, start with highest
             'comments': sorted(comments, key=lambda c: c['score'], reverse=True)
         }
-
-        print(result)
 
         # Stringify result dict
         return json.dumps(result)
