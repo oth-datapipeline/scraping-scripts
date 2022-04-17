@@ -13,15 +13,6 @@
             "Port": 29092
         }
     },
-    "Reddit": {
-        "RedditClientId": "rqjVhdrDgzHWuf771sYjgg",
-        "RedditClientSecret": "F4ygITGp5hC9CjvfEqfLOyK0htgWyw"
-    },
-    "Twitter": {
-        "TwitterConsumerKey": "CDmQUTIWd53wPGLa8hMBH60nZ",
-        "TwitterConsumerSecret": "58uFXiMXDxg4hl7xYBw6nc0qQjlapTlYuwdClyY12ZZRp5HzTi",
-        "TwitterBearerToken": "AAAAAAAAAAAAAAAAAAAAAE6BawEAAAAAsd%2FJ%2BrFgoAuCZDhvG4GkahPKWdg%3DGDVAuXpN8JGqxQfg5rLw3MyxgXOJBWxGOVtJ3qZKKfu3RtvVHR"
-    },
     "RssHeader": {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         "accept-language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
