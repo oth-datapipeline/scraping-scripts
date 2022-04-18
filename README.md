@@ -19,7 +19,7 @@ Afterwards, install all requirements:
 ## Starting the script
 The main script which does the data collection and publishing to the Kafka Broker is `data_collection.py`.
 
-It can be started like this in the console: `python data_collection.py --config CONFIG {rss, twitter, reddit}` where `--config` specifies the path to the configuration file 
+It can be started like this in the console: `python data_collection.py --config CONFIG {rss, twitter, reddit}` where `--config` specifies the path to the configuration file
 and the positional argument specifies the data source where data is collected from (RSS-feeds, Twitter or Reddit).
 
 If you want to scrape data from **RSS-feeds** you have pass the additional argument `--base_url` which specifies the URL of the RSS-Feed database where the links to the relevant RSS-Feeds can be found.

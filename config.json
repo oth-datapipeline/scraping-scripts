@@ -1,15 +1,18 @@
 {
     "General": {
-        "MaxWorkers": 20, 
+        "MaxWorkers": 20,
         "LoggingBaseDirectory": "/log"
-    }
-
-,
+    },
     "Kafka": {
-        "Host": "broker",
-        "Port": 29092
-    }
-, 
+        "Local": {
+            "Host": "localhost",
+            "Port": 9092
+        },
+        "Docker": {
+            "Host": "broker",
+            "Port": 29092
+        }
+    },
     "RssHeader": {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         "accept-language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",

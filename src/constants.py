@@ -1,5 +1,7 @@
 # Constants for config
 CONFIG_KAFKA = 'Kafka'
+CONFIG_KAFKA_ENV_LOCAL = 'Local'
+CONFIG_KAFKA_ENV_DOCKER = 'Docker'
 CONFIG_KAFKA_HOST = 'Host'
 CONFIG_KAFKA_PORT = 'Port'
 CONFIG_GENERAL = 'General'
