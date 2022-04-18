@@ -73,6 +73,7 @@ class RedditDataCollector(BaseDataCollector):
 
     def get_data_collection_futures(self, executor):
         """Get futures where data is collected from Reddit
+        
         :param executor: Executor where the futures are submitted to
         :type executor: concurrent.futures.Executor
         :return futures: futures
