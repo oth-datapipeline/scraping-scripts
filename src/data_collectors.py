@@ -115,7 +115,7 @@ class RedditDataCollector(BaseDataCollector):
         :return: Author information dictionary
         :rtype: dict
         """
-        redditor = obj.author.stream.redditor
+        redditor = obj.author
         return {
             'name': redditor.name,
             'member_since': (datetime.now() - datetime.fromtimestamp(redditor.created)).total_seconds(),
@@ -140,7 +140,7 @@ class RedditDataCollector(BaseDataCollector):
         # Fetch the top 20 comments
         submission.comment_sort = 'top'
         submission.comment_limit = 20
-        submission.comments.replace_more(limit=0)
+        submission.comments.replace_more(limit=None)
         comment_forest = submission.comments.list()
 
         # Build up comments list

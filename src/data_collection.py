@@ -1,15 +1,17 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import datetime
 import json
 import logging
+import traceback
 import os
 from requests.exceptions import RequestException
 
 from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, \
     CONFIG_KAFKA, CONFIG_KAFKA_ENV_LOCAL, CONFIG_KAFKA_ENV_DOCKER, CONFIG_KAFKA_HOST, CONFIG_KAFKA_PORT, \
     CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
-    CONFIG_REDDIT_CLIENT_ID, CONFIG_REDDIT_CLIENT_SECRET, \
-    CONFIG_TWITTER_CONSUMER_KEY, CONFIG_TWITTER_CONSUMER_SECRET, CONFIG_TWITTER_BEARER_TOKEN
+    REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, \
+    TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_BEARER_TOKEN
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer
 
@@ -60,12 +62,9 @@ def get_data_collector_instance(args, config):
     if args.data_source == DATA_SOURCE_RSS:
         return RssDataCollector(args.base_url, config[CONFIG_RSS_HEADER])
     elif args.data_source == DATA_SOURCE_REDDIT:
-        return RedditDataCollector(config["Reddit"][CONFIG_REDDIT_CLIENT_ID],
-                                   config["Reddit"][CONFIG_REDDIT_CLIENT_SECRET])
+        return RedditDataCollector(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)
     elif args.data_source == DATA_SOURCE_TWITTER:
-        return TwitterDataCollector(config["Twitter"][CONFIG_TWITTER_CONSUMER_KEY],
-                                    config["Twitter"][CONFIG_TWITTER_CONSUMER_SECRET],
-                                    config["Twitter"][CONFIG_TWITTER_BEARER_TOKEN])
+        return TwitterDataCollector(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_BEARER_TOKEN)
     else:
         raise NotImplementedError
 
@@ -101,6 +100,7 @@ def main():
                 logging.warning(f'Error in GET-Request: {e}')
                 continue
             except Exception:
+                print(f'{datetime.datetime.now()}: {traceback.format_exc()}')
                 continue
 
 
