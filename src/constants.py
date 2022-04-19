@@ -1,16 +1,24 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Constants for config
 CONFIG_KAFKA = 'Kafka'
+CONFIG_KAFKA_ENV_LOCAL = 'Local'
+CONFIG_KAFKA_ENV_DOCKER = 'Docker'
 CONFIG_KAFKA_HOST = 'Host'
 CONFIG_KAFKA_PORT = 'Port'
 CONFIG_GENERAL = 'General'
 CONFIG_GENERAL_MAX_WORKERS = 'MaxWorkers'
 CONFIG_BASE_LOGGING_DIR = 'BaseLoggingDir'
 CONFIG_RSS_HEADER = 'RssHeader'
-CONFIG_REDDIT_CLIENT_ID = 'RedditClientId'
-CONFIG_REDDIT_CLIENT_SECRET = 'RedditClientSecret'
-CONFIG_TWITTER_CONSUMER_KEY = 'TwitterConsumerKey'
-CONFIG_TWITTER_CONSUMER_SECRET = 'TwitterConsumerSecret'
-CONFIG_TWITTER_BEARER_TOKEN = 'TwitterBearerToken'
+
+REDDIT_CLIENT_ID = os.environ['REDDIT_CLIENT_ID']
+REDDIT_CLIENT_SECRET = os.environ['REDDIT_CLIENT_SECRET']
+TWITTER_CONSUMER_KEY = os.environ['TWITTER_CONSUMER_KEY']
+TWITTER_CONSUMER_SECRET = os.environ['TWITTER_CONSUMER_SECRET']
+TWITTER_BEARER_TOKEN = os.environ['TWITTER_BEARER_TOKEN']
 
 # Constants for argument parser
 DATA_SOURCE_RSS = 'rss'

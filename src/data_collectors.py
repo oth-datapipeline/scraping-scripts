@@ -78,47 +78,100 @@ class RedditDataCollector(BaseDataCollector):
         :return futures: futures
         :rtype: concurrent.futures.Future
         """
-        subreddits = ['worldnews', 'news', 'europe', 'politics', 'upliftingnews', 'truereddit', 'inthenews', 'nottheonion']
-        submissions = self._get_submissions(subreddits)
+        subreddits = [
+            'worldnews',
+            'news',
+            'europe',
+            'politics',
+            'liberal',
+            'conservative',
+            'upliftingnews',
+            'truereddit',
+            'inthenews',
+            'nottheonion']
+
+        submissions = []
+        for subreddit in subreddits:
+            submissions += self._get_submissions(subreddit)
+
         futures = list(map(lambda submission: executor.submit(self._process_submission, submission), submissions))
         return futures
-    
-    def _get_submissions(self, subreddits):
-        query = 'all'
-        if len(subreddits) > 0:
-            query = '+'.join(subreddits)
+
+    def _get_submissions(self, query):
+        """Fetch up to 100 hot submissions of given subreddit
+        :param query: Name of reddit to fetch submissions from
+        :type query: str
+        :return submissions: Fetched submissions
+        :rtype: praw.models.listing.generator.ListingGenerator
+        """
         subreddit = self._API.subreddit(query)
-        submissions = subreddit.top('day')
+        submissions = subreddit.hot(limit=100)
         return submissions
-    
+
+    def _get_author_information(self, obj):
+        """Collects relevant author information of given object
+        :param obj: Source of author information, either submission or comment
+        :type obj: praw.models.reddit.comment.Comment_or_praw.models.reddit.submission.Submission
+        :return: Author information dictionary
+        :rtype: dict
+        """
+        redditor = obj.author
+        return {
+            'name': redditor.name,
+            'member_since': (datetime.now() - datetime.fromtimestamp(redditor.created)).total_seconds(),
+            'karma': {
+                'awardee': redditor.awardee_karma,
+                'awarder': redditor.awarder_karma,
+                'comment': redditor.comment_karma,
+                'link': redditor.link_karma,
+                'total': redditor.total_karma,
+            }
+        }
+
     def _process_submission(self, submission):
-        # Fetch the top ten comments
+        """
+        Processes given submission by extracting up to 20 comments and building a result dictionary
+        consisting of relevant information of the submission and a dict of comments.
+        :param submission: Submission to be processed
+        :type submission: praw.models.reddit.submission.Submission
+        :return: Result dictionary with processed data of given submission
+        :rtype: dict
+        """
+        # Fetch the top 20 comments
         submission.comment_sort = 'top'
-        submission.comment_limit = 10
-        submission.comments.replace_more(limit=0)
+        submission.comment_limit = 20
+        submission.comments.replace_more(limit=None)
         comment_forest = submission.comments.list()
-        
+
         # Build up comments list
         comments = []
         for comment in comment_forest:
             comments.append({
+                'author': self._get_author_information(comment),
                 'text': comment.body,
-                'created': str(datetime.fromtimestamp(comment.created)), # CEST
+                'created': str(datetime.fromtimestamp(comment.created)),  # CEST
                 'score': comment.score
             })
-        
+
         # Build result dict
         result = {
             'id': submission.id,
             'title': submission.title,
-            'selftext': submission.selftext,
-            'created': str(datetime.fromtimestamp(submission.created)), # CEST
+            'author': self._get_author_information(submission),
+            # 'selftext': submission.selftext, # seems to always be empty, dump it for now
+            'created': str(datetime.fromtimestamp(submission.created)),  # CEST
             'score': submission.score,
             'upvote_ratio': submission.upvote_ratio,
             'domain': submission.domain,
-            'comments': comments
+            'url': submission.url,
+            'reddit': {
+                'subreddit': submission.subreddit.display_name,
+                'url': submission.permalink,
+            },
+            # sort by comment score, start with highest
+            'comments': sorted(comments, key=lambda c: c['score'], reverse=True)
         }
-        
+
         # Stringify result dict
         return json.dumps(result)
 
