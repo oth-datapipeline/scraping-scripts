@@ -26,6 +26,8 @@ REDDIT_CLIENT_SECRET="<client_secret_you_have_obtained_from_reddit>"
 TWITTER_CONSUMER_KEY="<consumer_key_you_have_obtained_from_twitter>"
 TWITTER_CONSUMER_SECRET="<consumer_secret_you_have_obtained_from_twitter>"
 TWITTER_BEARER_TOKEN="<bearer_token_you_have_obtained_from_twitter>"
+MONGO_INITDB_ROOT_USERNAME="<root_username_for_mongodb>"
+MONGO_INITDB_ROOT_PASSWORD="<root_password_for_mongodb>"
 ```
 
 ## Starting the script
