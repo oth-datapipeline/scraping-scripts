@@ -1,6 +1,6 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import datetime
+from datetime import datetime
 import json
 import logging
 import traceback
@@ -104,8 +104,8 @@ def get_job_collection(host, port):
     :rtype: pymongo.collection.Collection
     """
     client = MongoClient(host, port, username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
-    db = client['test']
-    return db['producer_job']
+    db = client['logs']
+    return db['producer_jobs']
 
 
 def main():
@@ -141,16 +141,17 @@ def main():
                 logging.warning(f'Error in GET-Request: {e}')
                 continue
             except Exception:
-                print(f'{datetime.datetime.now()}: {traceback.format_exc()}')
+                logging.error(traceback.format_exc())
                 continue
 
     end_time = datetime.now()
-    mongo_host = config[CONFIG_MONGODB][CONFIG_MONGODB_HOST]
-    mongo_port = config[CONFIG_MONGODB][CONFIG_MONGODB_PORT]
+    mongo_host = config[CONFIG_MONGODB][scraper_env][CONFIG_MONGODB_HOST]
+    mongo_port = config[CONFIG_MONGODB][scraper_env][CONFIG_MONGODB_PORT]
     job_collection = get_job_collection(mongo_host, mongo_port)
     job_metadata = {
         "start_time": start_time,
         "end_time": end_time,
+        "data_source": args.data_source,
         "duration_in_seconds": (end_time - start_time).seconds,
         "logfile": logpath
     }

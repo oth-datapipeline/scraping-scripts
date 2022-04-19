@@ -13,9 +13,15 @@
             "Port": 29092
         }
     },
-    "Mongo": {
-        "Host": "mongo", 
-        "Port": 27017
+    "MongoDB": {
+        "Local": {
+            "Host": "localhost",
+            "Port": 27017
+        },
+        "Docker": {
+            "Host": "mongo", 
+            "Port": 27017
+        }
     },
     "RssHeader": {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
