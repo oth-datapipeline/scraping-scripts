@@ -10,9 +10,11 @@ from requests.exceptions import RequestException
 
 from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_BASE_LOGGING_DIR, \
     CONFIG_KAFKA, CONFIG_KAFKA_ENV_LOCAL, CONFIG_KAFKA_ENV_DOCKER, CONFIG_KAFKA_HOST, CONFIG_KAFKA_PORT, \
-    CONFIG_RSS_HEADER, DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
-    REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, \
-    TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_BEARER_TOKEN
+    CONFIG_RSS_HEADER, CONFIG_MONGODB, CONFIG_MONGODB_HOST, CONFIG_MONGODB_PORT, \
+    DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
+    REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, \
+    TWITTER_BEARER_TOKEN, MONGODB_USERNAME, MONGODB_PASSWORD
+    
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer 
 from helper import build_logging_filepath
@@ -91,15 +93,17 @@ def get_data_collector_instance(args, config):
         raise NotImplementedError
 
 
-def get_job_collection(): 
+def get_job_collection(host, port): 
     """Get the MongoDB collection which holds the producer jobs
-
+    
+    :param host: Hostname of the MongoDB database
+    :type host: str
+    :param port: Port of the MongoDB database
+    :type port: int
     :return: Object which holds the Mongo collection
     :rtype: pymongo.collection.Collection
     """
-    user = os.environ['MONGO_INITDB_ROOT_USERNAME']
-    pw = os.environ['MONGO_INITDB_ROOT_PASSWORD']
-    client = MongoClient("localhost", 27017, username=user, password=pw)
+    client = MongoClient(host, port, username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
     db = client['test']
     return db['producer_job']
 
@@ -141,7 +145,9 @@ def main():
                 continue
 
     end_time = datetime.now()
-    job_collection = get_job_collection()
+    mongo_host = config[CONFIG_MONGODB][CONFIG_MONGODB_HOST]
+    mongo_port = config[CONFIG_MONGODB][CONFIG_MONGODB_PORT]
+    job_collection = get_job_collection(mongo_host, mongo_port)
     job_metadata = {
         "start_time": start_time,
         "end_time": end_time,
