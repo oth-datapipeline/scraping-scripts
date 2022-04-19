@@ -1,7 +1,7 @@
 {
     "General": {
-        "MaxWorkers": 20,
-        "LoggingBaseDirectory": "/log"
+        "MaxWorkers": 20, 
+        "BaseLoggingDir": "/producers/logs"
     },
     "Kafka": {
         "Local": {
@@ -11,6 +11,16 @@
         "Docker": {
             "Host": "broker",
             "Port": 29092
+        }
+    },
+    "MongoDB": {
+        "Local": {
+            "Host": "localhost",
+            "Port": 27017
+        },
+        "Docker": {
+            "Host": "mongo", 
+            "Port": 27017
         }
     },
     "RssHeader": {
