@@ -9,7 +9,7 @@ from pymongo import MongoClient
 from requests.exceptions import RequestException
 
 from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_BASE_LOGGING_DIR, \
-    CONFIG_KAFKA, CONFIG_KAFKA_ENV_LOCAL, CONFIG_KAFKA_ENV_DOCKER, CONFIG_KAFKA_HOST, CONFIG_KAFKA_PORT, \
+    CONFIG_KAFKA, CONFIG_ENV_LOCAL, CONFIG_ENV_DOCKER, CONFIG_KAFKA_HOST, CONFIG_KAFKA_PORT, \
     CONFIG_RSS_HEADER, CONFIG_MONGODB, CONFIG_MONGODB_HOST, CONFIG_MONGODB_PORT, \
     DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
     REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, \
@@ -114,7 +114,7 @@ def main():
     config = get_config(args.config)
     logpath = set_logging_config(args, config)
     is_local = os.getenv("SCRAPER_ENV_LOCAL", 'False').lower() in ('true', '1', 't')
-    scraper_env = CONFIG_KAFKA_ENV_LOCAL if is_local else CONFIG_KAFKA_ENV_DOCKER
+    scraper_env = CONFIG_ENV_LOCAL if is_local else CONFIG_ENV_DOCKER
     kafka_host = config[CONFIG_KAFKA][scraper_env][CONFIG_KAFKA_HOST]
     kafka_port = config[CONFIG_KAFKA][scraper_env][CONFIG_KAFKA_PORT]
     producer = Producer(kafka_host, kafka_port)
