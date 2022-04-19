@@ -126,6 +126,7 @@ def main():
             f'Data collection not implemented for data source {args.data_source}')
 
     max_workers = int(config[CONFIG_GENERAL][CONFIG_GENERAL_MAX_WORKERS])
+    count_successful = count_failed = 0
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
 
         futures = data_collector.get_data_collection_futures(executor=executor)
@@ -137,11 +138,14 @@ def main():
                 else:
                     message = future.result().text
                 producer.publish(args.data_source, message)
+                count_successful = count_successful + 1
             except RequestException as e:
                 logging.warning(f'Error in GET-Request: {e}')
+                count_failed = count_failed + 1
                 continue
             except Exception:
                 logging.error(traceback.format_exc())
+                count_failed = count_failed + 1
                 continue
 
     end_time = datetime.now()
@@ -153,6 +157,8 @@ def main():
         "end_time": end_time,
         "data_source": args.data_source,
         "duration_in_seconds": (end_time - start_time).seconds,
+        "successful_events": count_successful, 
+        "failed_events": count_failed,
         "logfile": logpath
     }
     job_collection.insert_one(job_metadata)
