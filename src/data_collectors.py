@@ -130,6 +130,16 @@ class TwitterDataCollector(BaseDataCollector):
     _current_trends = {'queries': [], 'fetched_at': None}
     
     def __init__(self, consumer_key, consumer_secret, bearer_token):
+        """Data collector for tweets connected to the latest worldwide
+        Twitter trends
+
+        :param consumer_key: Authentication key
+        :type consumer_key: str
+        :param consumer_secret: Authentication secret
+        :type consumer_key: str
+        :param bearer_token: Bearer token
+        :type bearer_token: str
+        """
         super().__init__()
         auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret)
         self._API = tweepy.API(auth)  # from Twitter APIv1.1
@@ -154,6 +164,9 @@ class TwitterDataCollector(BaseDataCollector):
         return futures
     
     def _update_current_trends(self):
+        """Update the static variable _current_trends with the latest
+        trending topics of Twitter Worldwide trends list
+        """
         # Trending location: Worldwide (woeid: 1)
         trending_location = 1
         results = self._API.get_place_trends(trending_location)[0]
@@ -164,6 +177,14 @@ class TwitterDataCollector(BaseDataCollector):
         self._current_trends['fetched_at'] = time.time()
 
     def _process_query(self, trending_topic):
+        """Search and process the most relevant tweets for a certain
+        trending topic
+
+        :param trending_topic: phrase connected to current Twitter trend
+        :type trending_topic: str
+        :return results_json: json-stringified results dict with tweets
+        :rtype str
+        """
         # Refine the query with additional statements
         query = trending_topic + ' -is:retweet -is:reply -is:nullcast lang:en'
 
@@ -188,7 +209,7 @@ class TwitterDataCollector(BaseDataCollector):
         # Build results dict
         results = {}
         for tweet in tweets.data:
-            if tweet.public_metrics['like_count'] < 1000:
+            if tweet.public_metrics['like_count'] < 100:
                 continue
             author = {}
             if tweet.author_id:
