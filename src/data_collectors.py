@@ -4,6 +4,7 @@ import requests
 import praw
 import tweepy
 import json
+import time
 from datetime import datetime
 
 from constants import FEED_ENTRY_REGEX, FEED_URL_REGEX, TIMEOUT_RSS_REQUEST
@@ -177,11 +178,27 @@ class RedditDataCollector(BaseDataCollector):
 
 
 class TwitterDataCollector(BaseDataCollector):
+    # Storing the current trends in a static variable
+    # Purpose: Fetching trends has a significantly lower rate limit than searching tweets
+    _current_trends = {'queries': [], 'fetched_at': None}
+    
     def __init__(self, consumer_key, consumer_secret, bearer_token):
+        """Data collector for tweets connected to the latest worldwide
+        Twitter trends
+
+        :param consumer_key: Authentication key
+        :type consumer_key: str
+        :param consumer_secret: Authentication secret
+        :type consumer_key: str
+        :param bearer_token: Bearer token
+        :type bearer_token: str
+        """
         super().__init__()
         auth = tweepy.OAuth1UserHandler(consumer_key, consumer_secret)
         self._API = tweepy.API(auth)  # from Twitter APIv1.1
         self._CLIENT = tweepy.Client(bearer_token)  # from Twitter APIv2
+        # Initially fetching the current trends
+        self._update_current_trends()
 
     def get_data_collection_futures(self, executor):
         """Get futures where data is collected from Twitter
@@ -191,45 +208,53 @@ class TwitterDataCollector(BaseDataCollector):
         :return futures: futures
         :rtype: concurrent.futures.Future
         """
-        trending_locations = self._get_trending_locations()
-        queries = self._get_trending_topics(trending_locations)
+        last_fetched_at = self._current_trends['fetched_at']
+        # Update the current trends at earliest after 15 min
+        if (time.time() - last_fetched_at) / 60 > 15:
+            self._update_current_trends()
+        queries = self._current_trends['queries']
         futures = list(map(lambda query: executor.submit(self._process_query, query), queries))
         return futures
-
-    def _get_trending_locations(self):
-        trending_locations = set()
-        # Worldwide
-        trending_locations.add(1)
-        # Germany
-        trending_locations.add(23424829)
-        # Nearby to Regensburg
-        lat_rgb = 49.1
-        long_rgb = 12.6
-        locations = self._API.closest_trends(lat_rgb, long_rgb)
-        for location in locations:
-            trending_locations.add(location['woeid'])
-        return list(trending_locations)
-
-    def _get_trending_topics(self, place_ids):
+    
+    def _update_current_trends(self):
+        """Update the static variable _current_trends with the latest
+        trending topics of Twitter Worldwide trends list
+        """
+        # Trending location: Worldwide (woeid: 1)
+        trending_location = 1
+        results = self._API.get_place_trends(trending_location)[0]
         queries = set()
-        for place_id in place_ids:
-            # The exclusion of hashtags might lead to a bit more serious collection of the latest news topics
-            results = self._API.get_place_trends(place_id, exclude='hashtags')[0]
-            for trend in results['trends']:
-                queries.add(trend['query'])
-        return list(queries)
+        for trend in results['trends']:
+            queries.add(trend['name'])
+        self._current_trends['queries'] = list(queries)
+        self._current_trends['fetched_at'] = time.time()
 
-    def _process_query(self, query):
+    def _process_query(self, trending_topic):
+        """Search and process the most relevant tweets for a certain
+        trending topic
+
+        :param trending_topic: phrase connected to current Twitter trend
+        :type trending_topic: str
+        :return results_json: json-stringified results dict with tweets
+        :rtype str
+        """
         # Refine the query with additional statements
-        query += ' -is:retweet -is:reply is:verified (lang:en OR lang:de)'
+        query = trending_topic + ' -is:retweet -is:reply -is:nullcast lang:en'
 
         # Search Tweets request to the Twitter APIv2
         tweets = self._CLIENT.search_recent_tweets(query,
-                                                   tweet_fields=['text', 'created_at', 'lang', 'geo'],
-                                                   expansions=['geo.place_id'],
+                                                   tweet_fields=['text', 'created_at', 'lang', 'public_metrics', 'geo'],
+                                                   user_fields=['username', 'verified', 'public_metrics'],
+                                                   expansions=['author_id', 'geo.place_id'],
+                                                   sort_order='relevancy',
                                                    max_results=100)
 
-        # Get places list from the includes object
+        # Get users and places lists from the includes object
+        users = {}
+        if 'users' in tweets.includes:
+            users  = {user.id: {'username': user.username,
+                                'verified': user.verified,
+                                'num_followers': user.public_metrics['followers_count']} for user in tweets.includes['users']}
         places = {}
         if 'places' in tweets.includes:
             places = {place.id: place.full_name for place in tweets.includes['places']}
@@ -237,14 +262,21 @@ class TwitterDataCollector(BaseDataCollector):
         # Build results dict
         results = {}
         for tweet in tweets.data:
+            if tweet.public_metrics['like_count'] < 100:
+                continue
+            author = {}
+            if tweet.author_id:
+                author = users[tweet.author_id]
             place = ''
             if tweet.geo:
                 place = places[tweet.geo['place_id']]
             results[tweet.id] = {
                 'text': tweet.text,
                 'created_at': str(tweet.created_at),
-                'lang': tweet.lang,
-                'place': place
+                'metrics': tweet.public_metrics,
+                'author': author,
+                'place': place,
+                'trend': trending_topic
             }
 
         # Stringify results dict
