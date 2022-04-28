@@ -1,3 +1,4 @@
+import os
 import requests
 import feedparser
 
@@ -25,3 +26,18 @@ def split_rss_feed(full_feed):
     """
     parsed = feedparser.parse(full_feed)
     return [dict(entry, **{"feed_source": parsed.feed.title}) for entry in parsed.entries]
+
+
+def build_logging_filepath(path): 
+    """Function for building the path where the logs are saved to
+       If a logfile with this path already exists, a counter is added to the filename
+
+    :param path: The path to the file where the 
+    """
+    
+    filename, extension = os.path.splitext(path)
+    counter = 1
+    while(os.path.exists(path)):
+        path = f'{filename}_{str(counter)}{extension}'
+        counter = counter + 1
+    return path

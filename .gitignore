@@ -6,6 +6,7 @@ config.json
 
 # Dotfiles that don't belong in the repo
 .DS_Store
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

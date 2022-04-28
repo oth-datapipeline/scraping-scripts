@@ -50,6 +50,15 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Gather sensitive data for testing
+        run: |
+          echo 'REDDIT_CLIENT_ID=${{ secrets.REDDIT_CLIENT_ID }}' > .env
+          echo 'REDDIT_CLIENT_SECRET=${{ secrets.REDDIT_CLIENT_SECRET }}' >> .env
+          echo 'TWITTER_CONSUMER_KEY=${{ secrets.TWITTER_CONSUMER_KEY }}' >> .env
+          echo 'TWITTER_CONSUMER_SECRET=${{ secrets.TWITTER_CONSUMER_SECRET }}' >> .env
+          echo 'TWITTER_BEARER_TOKEN=${{ secrets.TWITTER_BEARER_TOKEN }}' >> .env
+          echo 'MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}' >> .env
+          echo 'MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}' >> .env
       - name: Execute tests with pytest
         run: pytest test
 
