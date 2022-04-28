@@ -173,13 +173,13 @@ class TwitterStreamingClient(tweepy.StreamingClient):
 
         # Build results dict
         result = {}
-        result[tweet.id] = {
-            'text': tweet.text,
-            'created_at': str(tweet.created_at),
-            'metrics': tweet.public_metrics,
-            'author': author,
-            'place': place,
-            'trend': rules[0].tag
-        }
+        result['tweet_id'] = tweet.id
+        result['text'] = tweet.text
+        result['created_at'] = str(tweet.created_at)
+        result['metrics'] = tweet.public_metrics
+        result['author'] = author
+        if place != '':
+            result['place'] = place
+        result['trend'] = rules[0].tag
 
-        return json.dumps(result)
+        return json.dumps([result])
