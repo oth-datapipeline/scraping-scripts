@@ -159,17 +159,14 @@ class TwitterStreamingClient(tweepy.StreamingClient):
         :rtype: str
         """
         author = {}
-        if 'users' in includes:
-            if tweet.author_id in includes['users']:
-                user = includes['users'][tweet.author_id]
-                author = {'username': user.username,
-                          'verified': user.verified,
-                          'num_followers': user.public_metrics['followers_count']}
+        if 'users' in includes and tweet.author_id in includes['users']:
+            user = includes['users'][tweet.author_id]
+            author = {'username': user.username,
+                      'verified': user.verified,
+                      'num_followers': user.public_metrics['followers_count']}
         place = ''
-        if 'places' in includes:
-            if tweet.geo:
-                if tweet.geo['place_id'] in includes['places']:
-                    place = includes['places'][tweet.geo['place_id']].full_name
+        if 'places' in includes and tweet.geo and tweet.geo['place_id'] in includes['places']:
+            place = includes['places'][tweet.geo['place_id']].full_name
 
         # Build results dict
         result = {}
