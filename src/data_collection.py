@@ -16,7 +16,8 @@ from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_BASE_LO
     TWITTER_BEARER_TOKEN, MONGODB_USERNAME, MONGODB_PASSWORD
     
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
-from producer import Producer 
+from data_streamers import TwitterDataStreamer
+from producer import Producer
 from helper import build_logging_filepath
 
 
@@ -33,6 +34,8 @@ def get_arguments():
         'rss', help='Scrape data from RSS feeds')
     rss_parser.add_argument('--base_url', required=True,
                             help='URL of a RSS feed database where links to relevant RSS feeds can be found')
+    twitter_parser.add_argument('--stream', action='store_true', default=False, dest='stream',
+                                help='Additional flag for activating tweets streaming')
     # reddit parser
     subparsers.add_parser(
         'reddit', help='Scrape data from reddit')
@@ -75,7 +78,7 @@ def set_logging_config(args, config):
 
 
 def get_data_collector_instance(args, config):
-    """Get the instance of the data
+    """Get the instance of data collector
 
     :param args: arguments of the script
     :type args: Namespace
@@ -92,6 +95,22 @@ def get_data_collector_instance(args, config):
     else:
         raise NotImplementedError
 
+
+def get_data_streamer_instance(args, config):
+    """Get the instance of data streamer
+
+    :param args: arguments of the script
+    :type args: Namespace
+    :raises NotImplementedError: no data streamer implemented for given data source
+    :return: instance of the specific data streamer
+    :rtype: subclass of BaseDataStreamer
+    """
+    if args.data_source == DATA_SOURCE_TWITTER:
+        return TwitterDataStreamer(config["Twitter"][CONFIG_TWITTER_CONSUMER_KEY],
+                                   config["Twitter"][CONFIG_TWITTER_CONSUMER_SECRET],
+                                   config["Twitter"][CONFIG_TWITTER_BEARER_TOKEN])
+    else:
+        raise NotImplementedError
 
 def get_job_collection(host, port): 
     """Get the MongoDB collection which holds the producer jobs
@@ -118,35 +137,47 @@ def main():
     kafka_host = config[CONFIG_KAFKA][scraper_env][CONFIG_KAFKA_HOST]
     kafka_port = config[CONFIG_KAFKA][scraper_env][CONFIG_KAFKA_PORT]
     producer = Producer(kafka_host, kafka_port)
-    data_collector = None
-    try:
-        data_collector = get_data_collector_instance(args, config)
-    except NotImplementedError:
-        logging.error(
-            f'Data collection not implemented for data source {args.data_source}')
+    
+    if args.stream:
+        data_streamer = None
+        try:
+            data_streamer = get_data_streamer_instance(args, config)
+        except NotImplementedError:
+            logging.error(
+                f'Data streaming not implemented for data source {args.data_source}')
 
-    max_workers = int(config[CONFIG_GENERAL][CONFIG_GENERAL_MAX_WORKERS])
-    count_successful = count_failed = 0
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        data_streamer.stream_into_producer(producer)
+    
+    else:
+        data_collector = None
+        try:
+            data_collector = get_data_collector_instance(args, config)
+        except NotImplementedError:
+            logging.error(
+                f'Data collection not implemented for data source {args.data_source}')
 
-        futures = data_collector.get_data_collection_futures(executor=executor)
-        for future in as_completed(futures):
-            try:
-                response = future.result()
-                if(isinstance(response, str)):
-                    message = response
-                else:
-                    message = future.result().text
-                producer.publish(args.data_source, message)
-                count_successful = count_successful + 1
-            except RequestException as e:
-                logging.warning(f'Error in GET-Request: {e}')
-                count_failed = count_failed + 1
-                continue
-            except Exception:
-                logging.error(traceback.format_exc())
-                count_failed = count_failed + 1
-                continue
+        max_workers = int(config[CONFIG_GENERAL][CONFIG_GENERAL_MAX_WORKERS])
+        count_successful = count_failed = 0
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = data_collector.get_data_collection_futures(executor=executor)
+            
+            for future in as_completed(futures):
+                try:
+                    response = future.result()
+                    if(isinstance(response, str)):
+                        message = response
+                    else:
+                        message = future.result().text
+                    producer.publish(args.data_source, message)
+                    count_successful = count_successful + 1
+                except RequestException as e:
+                    logging.warning(f'Error in GET-Request: {e}')
+                    count_failed = count_failed + 1
+                    continue
+                except Exception:
+                    logging.error(traceback.format_exc())
+                    count_failed = count_failed + 1
+                    continue
 
     end_time = datetime.now()
     mongo_host = config[CONFIG_MONGODB][scraper_env][CONFIG_MONGODB_HOST]
