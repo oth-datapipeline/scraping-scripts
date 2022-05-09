@@ -133,7 +133,7 @@ def main():
         for future in as_completed(futures):
             try:
                 response = future.result()
-                if(isinstance(response, str)):
+                if(isinstance(response, str) or isinstance(response, list)):
                     message = response
                 else:
                     message = future.result().text

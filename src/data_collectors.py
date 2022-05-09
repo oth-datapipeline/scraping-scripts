@@ -221,7 +221,9 @@ class TwitterDataCollector(BaseDataCollector):
         trending topics of Twitter Worldwide trends list
         """
         # Trending location: Worldwide (woeid: 1)
-        trending_location = 1
+        # trending_location = 1
+        # 23424977 is id of USA
+        trending_location = 23424977 
         results = self._API.get_place_trends(trending_location)[0]
         queries = set()
         for trend in results['trends']:
@@ -276,4 +278,4 @@ class TwitterDataCollector(BaseDataCollector):
             results.append(result)
 
         # Stringify results list
-        return json.dumps(results)
+        return results
