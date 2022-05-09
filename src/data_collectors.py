@@ -235,7 +235,7 @@ class TwitterDataCollector(BaseDataCollector):
 
         :param trending_topic: phrase connected to current Twitter trend
         :type trending_topic: str
-        :return results_json: json-stringified results dict with tweets
+        :return results_json: json-stringified results list with tweets
         :rtype str
         """
         # Refine the query with additional statements
@@ -259,25 +259,21 @@ class TwitterDataCollector(BaseDataCollector):
         if 'places' in tweets.includes:
             places = {place.id: place.full_name for place in tweets.includes['places']}
 
-        # Build results dict
-        results = {}
+        # Build results list
+        results = []
         for tweet in tweets.data:
             if tweet.public_metrics['like_count'] < 100:
                 continue
-            author = {}
-            if tweet.author_id:
-                author = users[tweet.author_id]
-            place = ''
+            result = {}
+            result['tweet_id'] = tweet.id
+            result['text'] = tweet.text
+            result['created_at'] = str(tweet.created_at)
+            result['metrics'] = tweet.public_metrics
+            result['author'] = users[tweet.author_id]
             if tweet.geo:
-                place = places[tweet.geo['place_id']]
-            results[tweet.id] = {
-                'text': tweet.text,
-                'created_at': str(tweet.created_at),
-                'metrics': tweet.public_metrics,
-                'author': author,
-                'place': place,
-                'trend': trending_topic
-            }
+                result['place'] = places[tweet.geo['place_id']]
+            result['trend'] = trending_topic
+            results.append(result)
 
-        # Stringify results dict
+        # Stringify results list
         return json.dumps(results)
