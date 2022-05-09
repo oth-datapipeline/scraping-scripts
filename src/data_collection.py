@@ -8,12 +8,7 @@ import os
 from pymongo import MongoClient
 from requests.exceptions import RequestException
 
-from constants import CONFIG_GENERAL, CONFIG_GENERAL_MAX_WORKERS, CONFIG_BASE_LOGGING_DIR, \
-    CONFIG_KAFKA, CONFIG_ENV_LOCAL, CONFIG_ENV_DOCKER, CONFIG_KAFKA_HOST, CONFIG_KAFKA_PORT, \
-    CONFIG_RSS_HEADER, CONFIG_MONGODB, CONFIG_MONGODB_HOST, CONFIG_MONGODB_PORT, \
-    DATA_SOURCE_REDDIT, DATA_SOURCE_RSS, DATA_SOURCE_TWITTER, \
-    REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, \
-    TWITTER_BEARER_TOKEN, MONGODB_USERNAME, MONGODB_PASSWORD
+import constants as const
     
 from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCollector
 from producer import Producer 
@@ -62,7 +57,7 @@ def set_logging_config(args, config):
     :param config: key-value-pairs of the config fields
     :type config: dict
     """
-    log_base_dir = config[CONFIG_GENERAL][CONFIG_BASE_LOGGING_DIR]
+    log_base_dir = config[const.CONFIG_GENERAL][const.CONFIG_BASE_LOGGING_DIR]
     log_dir = os.path.join(log_base_dir, args.data_source)
     log_filename = f'{datetime.today().strftime("%Y_%m_%d")}.log'
     log_complete_path = build_logging_filepath(os.path.join(log_dir, log_filename))
@@ -74,6 +69,22 @@ def set_logging_config(args, config):
     return log_complete_path
 
 
+def get_job_collection(): 
+    """Get the MongoDB collection which stores the producer jobs
+    
+    :param host: Hostname of the MongoDB database
+    :type host: str
+    :param port: Port of the MongoDB database
+    :type port: int
+    :raises KeyError: one of the necessary environment variables are not set
+    :return: Object which holds the Mongo collection
+    :rtype: pymongo.collection.Collection
+    """
+    client = MongoClient(const.MONGODB_HOST, int(const.MONGODB_PORT), username=const.MONGODB_USERNAME, password=const.MONGODB_PASSWORD)
+    db = client['logs']
+    return db['producer_jobs']
+
+
 def get_data_collector_instance(args, config):
     """Get the instance of the data
 
@@ -83,29 +94,14 @@ def get_data_collector_instance(args, config):
     :return: instance of the specific data collector
     :rtype: subclass of BaseDataCollector
     """
-    if args.data_source == DATA_SOURCE_RSS:
-        return RssDataCollector(args.base_url, config[CONFIG_RSS_HEADER])
-    elif args.data_source == DATA_SOURCE_REDDIT:
-        return RedditDataCollector(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)
-    elif args.data_source == DATA_SOURCE_TWITTER:
-        return TwitterDataCollector(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITTER_BEARER_TOKEN)
+    if args.data_source == const.DATA_SOURCE_RSS:
+        return RssDataCollector(args.base_url, config[const.CONFIG_RSS_HEADER])
+    elif args.data_source == const.DATA_SOURCE_REDDIT:
+        return RedditDataCollector(const.REDDIT_CLIENT_ID, const.REDDIT_CLIENT_SECRET)
+    elif args.data_source == const.DATA_SOURCE_TWITTER:
+        return TwitterDataCollector(const.TWITTER_CONSUMER_KEY, const.TWITTER_CONSUMER_SECRET, const.TWITTER_BEARER_TOKEN)
     else:
         raise NotImplementedError
-
-
-def get_job_collection(host, port): 
-    """Get the MongoDB collection which holds the producer jobs
-    
-    :param host: Hostname of the MongoDB database
-    :type host: str
-    :param port: Port of the MongoDB database
-    :type port: int
-    :return: Object which holds the Mongo collection
-    :rtype: pymongo.collection.Collection
-    """
-    client = MongoClient(host, port, username=MONGODB_USERNAME, password=MONGODB_PASSWORD)
-    db = client['logs']
-    return db['producer_jobs']
 
 
 def main():
@@ -113,19 +109,17 @@ def main():
     args = get_arguments()
     config = get_config(args.config)
     logpath = set_logging_config(args, config)
-    is_local = os.getenv("SCRAPER_ENV_LOCAL", 'False').lower() in ('true', '1', 't')
-    scraper_env = CONFIG_ENV_LOCAL if is_local else CONFIG_ENV_DOCKER
-    kafka_host = config[CONFIG_KAFKA][scraper_env][CONFIG_KAFKA_HOST]
-    kafka_port = config[CONFIG_KAFKA][scraper_env][CONFIG_KAFKA_PORT]
-    producer = Producer(kafka_host, kafka_port)
+    job_collection = get_job_collection()
+    producer = Producer(const.KAFKA_BOOTSTRAP_SERVERS)
     data_collector = None
     try:
         data_collector = get_data_collector_instance(args, config)
     except NotImplementedError:
         logging.error(
             f'Data collection not implemented for data source {args.data_source}')
+        return
 
-    max_workers = int(config[CONFIG_GENERAL][CONFIG_GENERAL_MAX_WORKERS])
+    max_workers = int(config[const.CONFIG_GENERAL][const.CONFIG_GENERAL_MAX_WORKERS])
     count_successful = count_failed = 0
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
 
@@ -149,9 +143,6 @@ def main():
                 continue
 
     end_time = datetime.now()
-    mongo_host = config[CONFIG_MONGODB][scraper_env][CONFIG_MONGODB_HOST]
-    mongo_port = config[CONFIG_MONGODB][scraper_env][CONFIG_MONGODB_PORT]
-    job_collection = get_job_collection(mongo_host, mongo_port)
     job_metadata = {
         "start_time": start_time,
         "end_time": end_time,

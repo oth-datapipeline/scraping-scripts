@@ -8,18 +8,17 @@ from helper import split_rss_feed
 
 class Producer(object):
     """Wrapper for a Kafka Producer
-    :param host: hostname of the bootstrap server
-    :type host: str
-    :param port: Port of the bootstrap server
-    :type port: str
+
+    :bootstrap_servers: bootstrap servers of the Kafka Cluster
+    :type bootstrap_servers: str
     """
 
-    def __init__(self, host, port):
+    def __init__(self, bootstrap_servers):
         """Constructor
         """
         try:
             self._producer = KafkaProducer(
-                bootstrap_servers=[f'{host}:{port}'], api_version=PRODUCER_API_VERSION)
+                bootstrap_servers=bootstrap_servers, api_version=PRODUCER_API_VERSION)
         except Exception as ex:
             print('Exception while connecting Kafka')
             print(str(ex))

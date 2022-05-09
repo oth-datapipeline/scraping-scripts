@@ -26,8 +26,25 @@ REDDIT_CLIENT_SECRET="<client_secret_you_have_obtained_from_reddit>"
 TWITTER_CONSUMER_KEY="<consumer_key_you_have_obtained_from_twitter>"
 TWITTER_CONSUMER_SECRET="<consumer_secret_you_have_obtained_from_twitter>"
 TWITTER_BEARER_TOKEN="<bearer_token_you_have_obtained_from_twitter>"
+MONGO_HOST="<mongo_host_name>"
+MONGO_PORT="<mongo_port_name>"
 MONGO_INITDB_ROOT_USERNAME="<root_username_for_mongodb>"
 MONGO_INITDB_ROOT_PASSWORD="<root_password_for_mongodb>"
+KAFKA_BOOTSTRAP_SERVERS="<Servers where producer should connect to in the format host:port>"
+```
+
+If the script is started locally, you have to set the following environment variables for MongoDB and Kafka:
+```sh
+MONGO_HOST="localhost"
+MONGO_PORT="27017"
+KAFKA_BOOTSTRAP_SERVERS="localhost:9092"
+```
+
+If the script is started as a service in the docker-compose file of the [oth-pipeline/infrastructure](https://github.com/oth-datapipeline/infrastructure) repository, you have to set the follwing values for MongoDB and Kafka:
+```sh
+MONGODB_HOST="mongo"
+MONGODB_PORT="27017"
+KAFKA_BOOTSTRAP_SERVERS="broker:29092" # if the Kafka Cluster consists of multiple hosts, you give the connections as comma separated strings (host1:port1,host2:port2,...)
 ```
 
 ## Starting the script
