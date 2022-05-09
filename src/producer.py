@@ -35,6 +35,8 @@ class Producer(object):
         """
         if ("rss" in topic):
             self.__publish_rss(topic, message)
+        elif ("twitter" in topic):
+            self.__publish_twitter(topic, message)
         else:
             key = bytes(str(uuid.uuid4()), encoding='utf-8')
             value_bytes = bytes(message, encoding='utf-8')
@@ -52,6 +54,14 @@ class Producer(object):
         :raises KafkaTimeoutError: timeout when sending message or flushing the buffer
         """
         messages = split_rss_feed(raw_feed)
+        for message in messages:
+            key = bytes(str(uuid.uuid4()), encoding='utf-8')
+            value_bytes = bytes(json.dumps(message), encoding='utf-8')
+            logging.info(f'Publish on topic {topic}: {key}')
+            self._producer.send(topic, key=key, value=value_bytes)
+
+    def __publish_twitter(self, topic, tweets):
+        messages = tweets
         for message in messages:
             key = bytes(str(uuid.uuid4()), encoding='utf-8')
             value_bytes = bytes(json.dumps(message), encoding='utf-8')
