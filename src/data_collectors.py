@@ -241,6 +241,8 @@ class TwitterDataCollector(BaseDataCollector):
         :rtype str
         """
         # Refine the query with additional statements
+        and_insensitive = re.compile(' and ', re.IGNORECASE)
+        trending_topic = and_insensitive.sub(' \"and\" ', trending_topic)
         query = trending_topic + ' -is:retweet -is:reply -is:nullcast lang:en'
 
         # Search Tweets request to the Twitter APIv2
@@ -263,19 +265,20 @@ class TwitterDataCollector(BaseDataCollector):
 
         # Build results list
         results = []
-        for tweet in tweets.data:
-            if tweet.public_metrics['like_count'] < 100:
-                continue
-            result = {}
-            result['tweet_id'] = tweet.id
-            result['text'] = tweet.text
-            result['created_at'] = str(tweet.created_at)
-            result['metrics'] = tweet.public_metrics
-            result['author'] = users[tweet.author_id]
-            if tweet.geo:
-                result['place'] = places[tweet.geo['place_id']]
-            result['trend'] = trending_topic
-            results.append(result)
+        if tweets.data is not None:
+            for tweet in tweets.data:
+                if tweet.public_metrics['like_count'] < 100:
+                    continue
+                result = {}
+                result['tweet_id'] = tweet.id
+                result['text'] = tweet.text
+                result['created_at'] = str(tweet.created_at)
+                result['metrics'] = tweet.public_metrics
+                result['author'] = users[tweet.author_id]
+                if tweet.geo:
+                    result['place'] = places[tweet.geo['place_id']]
+                result['trend'] = trending_topic
+                results.append(result)
 
         # Stringify results list
         return results
