@@ -19,6 +19,7 @@ from data_collectors import RedditDataCollector, RssDataCollector, TwitterDataCo
 from producer import Producer 
 from helper import build_logging_filepath
 
+import time
 
 def get_arguments():
     """Get script arguments from the argument parser
@@ -128,7 +129,7 @@ def main():
     max_workers = int(config[CONFIG_GENERAL][CONFIG_GENERAL_MAX_WORKERS])
     count_successful = count_failed = 0
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-
+        start = time.time()
         futures = data_collector.get_data_collection_futures(executor=executor)
         for future in as_completed(futures):
             try:
@@ -138,6 +139,7 @@ def main():
                 else:
                     message = future.result().text
                 producer.publish(args.data_source, message)
+                logging.info(f"Topic {args.data_source}: Message published")
                 count_successful = count_successful + 1
             except RequestException as e:
                 logging.warning(f'Error in GET-Request: {e}')
@@ -147,6 +149,9 @@ def main():
                 logging.error(traceback.format_exc())
                 count_failed = count_failed + 1
                 continue
+
+    count_total = count_successful + count_failed
+    logging.info(f"Topic {args.data_source}: {count_successful}/{count_total} Messages were published; {count_failed} failed.")
 
     end_time = datetime.now()
     mongo_host = config[CONFIG_MONGODB][scraper_env][CONFIG_MONGODB_HOST]
