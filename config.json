@@ -1,6 +1,6 @@
 {
     "General": {
-        "MaxWorkers": 20, 
+        "MaxWorkers": 8, 
         "BaseLoggingDir": "/producers/logs"
     },
     "Kafka": {

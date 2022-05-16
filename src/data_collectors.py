@@ -11,6 +11,8 @@ from constants import FEED_ENTRY_REGEX, FEED_URL_REGEX, TIMEOUT_RSS_REQUEST
 from helper import get_request_with_timeout
 
 
+from praw.models.redditors import Redditors
+
 class BaseDataCollector(object):
     """Base class for data collectors from different data sources
     """
@@ -70,7 +72,10 @@ class RssDataCollector(BaseDataCollector):
 class RedditDataCollector(BaseDataCollector):
     def __init__(self, client_id, client_secret):
         super().__init__()
-        self._API = praw.Reddit(client_id=client_id, client_secret=client_secret, user_agent='oth-datapipeline')
+        self._client_id = client_id
+        self._client_secret = client_secret
+        self._agent_name = 'linux:oth.datapipeline:v0.1'
+        self._API = praw.Reddit(client_id=client_id, client_secret=client_secret, user_agent=self._agent_name)
 
     def get_data_collection_futures(self, executor):
         """Get futures where data is collected from Reddit
@@ -94,7 +99,6 @@ class RedditDataCollector(BaseDataCollector):
         submissions = []
         for subreddit in subreddits:
             submissions += self._get_submissions(subreddit)
-
         futures = list(map(lambda submission: executor.submit(self._process_submission, submission), submissions))
         return futures
 
@@ -105,9 +109,9 @@ class RedditDataCollector(BaseDataCollector):
         :return submissions: Fetched submissions
         :rtype: praw.models.listing.generator.ListingGenerator
         """
-        subreddit = self._API.subreddit(query)
-        submissions = subreddit.hot(limit=100)
-        return submissions
+        subreddit = praw.Reddit(client_id=self._client_id, client_secret=self._client_secret, user_agent=self._agent_name).subreddit(query)
+        return subreddit.hot(limit=25)
+        
 
     def _get_author_information(self, obj):
         """Collects relevant author information of given object
@@ -116,10 +120,18 @@ class RedditDataCollector(BaseDataCollector):
         :return: Author information dictionary
         :rtype: dict
         """
+
         redditor = obj.author
-        return {
+
+        if (not redditor):
+            return {}
+
+        member_since = (datetime.now() - datetime.fromtimestamp(redditor.created)).total_seconds() if 'created' in redditor.__dict__ else -1
+        created = redditor.created if 'created' in redditor.__dict__ else -1
+        ret = {
             'name': redditor.name,
-            'member_since': (datetime.now() - datetime.fromtimestamp(redditor.created)).total_seconds(),
+            'member_since': member_since,
+            'created': created,
             'karma': {
                 'awardee': redditor.awardee_karma,
                 'awarder': redditor.awarder_karma,
@@ -128,6 +140,31 @@ class RedditDataCollector(BaseDataCollector):
                 'total': redditor.total_karma,
             }
         }
+        return ret
+
+    def _get_author_info_from_partial(self, partial_redditor):
+        """Extract relevant author information of given PartialRedditor
+        :param partial_redditor: Partial redditor object created by praw
+        :type partial_redditor:  praw.models.redditors.PartialRedditor
+        :return: Author information dictionary
+        :rtype: dict
+        """
+
+        if (not partial_redditor):
+            return {}
+
+        member_since = (datetime.utcnow() - datetime.fromtimestamp(partial_redditor.created_utc)).total_seconds() if 'created_utc' in partial_redditor.__dict__ else -1
+        created_utc = partial_redditor.created_utc if 'created_utc' in partial_redditor.__dict__ else -1
+        ret = {
+            'name': partial_redditor.name,
+            'member_since': member_since,
+            'created_utc': created_utc,
+            'karma': {
+                'comment': partial_redditor.comment_karma,
+                'link': partial_redditor.link_karma
+            }
+        }
+        return ret
 
     def _process_submission(self, submission):
         """
@@ -138,21 +175,30 @@ class RedditDataCollector(BaseDataCollector):
         :return: Result dictionary with processed data of given submission
         :rtype: dict
         """
+        
         # Fetch the top 20 comments
         submission.comment_sort = 'top'
         submission.comment_limit = 20
-        submission.comments.replace_more(limit=None)
-        comment_forest = submission.comments.list()
+        submission.comments.replace_more(limit=0)
+        comment_list = submission.comments
+
 
         # Build up comments list
         comments = []
-        for comment in comment_forest:
+        for comment in comment_list:
             comments.append({
                 'author': self._get_author_information(comment),
                 'text': comment.body,
                 'created': str(datetime.fromtimestamp(comment.created)),  # CEST
                 'score': comment.score
             })
+
+        # TODO: Decide which author variant to use
+        # authors = [comment.author.fullname for comment in comment_forest if comment.author]
+        # redditors = Redditors(self._API, None)
+        # partials = redditors.partial_redditors(authors)
+        # for comment, partial in zip(comments, partials):
+        #     comment["author"] = self._get_author_info_from_partial(partial)
 
         # Build result dict
         result = {
