@@ -5,7 +5,7 @@ import praw
 import tweepy
 import json
 import time
-from datetime import datetime
+from datetime import datetime, tzinfo
 
 from constants import FEED_ENTRY_REGEX, FEED_URL_REGEX, TIMEOUT_RSS_REQUEST
 from helper import get_request_with_timeout
@@ -294,7 +294,7 @@ class TwitterDataCollector(BaseDataCollector):
         # Search Tweets request to the Twitter APIv2
         tweets = self._CLIENT.search_recent_tweets(query,
                                                    tweet_fields=['text', 'created_at', 'lang', 'public_metrics', 'geo'],
-                                                   user_fields=['username', 'verified', 'public_metrics'],
+                                                   user_fields=['username', 'created_at', 'verified', 'public_metrics'],
                                                    expansions=['author_id', 'geo.place_id'],
                                                    sort_order='relevancy',
                                                    max_results=100)
@@ -303,6 +303,8 @@ class TwitterDataCollector(BaseDataCollector):
         users = {}
         if 'users' in tweets.includes:
             users  = {user.id: {'username': user.username,
+                                'created_at': user.created_at,
+                                'member_since': (datetime.now() - user.created_at.replace(tzinfo=None)).total_seconds(),
                                 'verified': user.verified,
                                 'num_followers': user.public_metrics['followers_count']} for user in tweets.includes['users']}
         places = {}
@@ -318,7 +320,7 @@ class TwitterDataCollector(BaseDataCollector):
                 result = {}
                 result['tweet_id'] = tweet.id
                 result['text'] = tweet.text
-                result['created_at'] = str(tweet.created_at)
+                result['created_at'] = tweet.created_at
                 result['metrics'] = tweet.public_metrics
                 result['author'] = users[tweet.author_id]
                 if tweet.geo:
