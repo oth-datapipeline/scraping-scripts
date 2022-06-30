@@ -11,8 +11,6 @@ from constants import FEED_ENTRY_REGEX, FEED_URL_REGEX, TIMEOUT_RSS_REQUEST
 from helper import get_request_with_timeout
 
 
-from praw.models.redditors import Redditors
-
 class BaseDataCollector(object):
     """Base class for data collectors from different data sources
     """
@@ -111,7 +109,6 @@ class RedditDataCollector(BaseDataCollector):
         """
         subreddit = praw.Reddit(client_id=self._client_id, client_secret=self._client_secret, user_agent=self._agent_name).subreddit(query)
         return subreddit.hot(limit=25)
-        
 
     def _get_author_information(self, obj):
         """Collects relevant author information of given object
@@ -153,7 +150,8 @@ class RedditDataCollector(BaseDataCollector):
         if (not partial_redditor):
             return {}
 
-        member_since = (datetime.utcnow() - datetime.fromtimestamp(partial_redditor.created_utc)).total_seconds() if 'created_utc' in partial_redditor.__dict__ else -1
+        member_since = (datetime.utcnow() - datetime.fromtimestamp(partial_redditor.created_utc)
+                        ).total_seconds() if 'created_utc' in partial_redditor.__dict__ else -1
         created_utc = partial_redditor.created_utc if 'created_utc' in partial_redditor.__dict__ else -1
         ret = {
             'name': partial_redditor.name,
@@ -175,13 +173,12 @@ class RedditDataCollector(BaseDataCollector):
         :return: Result dictionary with processed data of given submission
         :rtype: dict
         """
-        
+
         # Fetch the top 20 comments
         submission.comment_sort = 'top'
         submission.comment_limit = 20
         submission.comments.replace_more(limit=0)
         comment_list = submission.comments
-
 
         # Build up comments list
         comments = []
@@ -227,7 +224,7 @@ class TwitterDataCollector(BaseDataCollector):
     # Storing the current trends in a static variable
     # Purpose: Fetching trends has a significantly lower rate limit than searching tweets
     _current_trends = {'queries': [], 'fetched_at': None}
-    
+
     def __init__(self, consumer_key, consumer_secret, bearer_token):
         """Data collector for tweets connected to the latest worldwide
         Twitter trends
@@ -261,7 +258,7 @@ class TwitterDataCollector(BaseDataCollector):
         queries = self._current_trends['queries']
         futures = list(map(lambda query: executor.submit(self._process_query, query), queries))
         return futures
-    
+
     def _update_current_trends(self):
         """Update the static variable _current_trends with the latest
         trending topics of Twitter Worldwide trends list
@@ -269,7 +266,7 @@ class TwitterDataCollector(BaseDataCollector):
         # Trending location: Worldwide (woeid: 1)
         # trending_location = 1
         # 23424977 is id of USA
-        trending_location = 23424977 
+        trending_location = 23424977
         results = self._API.get_place_trends(trending_location)[0]
         queries = set()
         for trend in results['trends']:
@@ -302,9 +299,9 @@ class TwitterDataCollector(BaseDataCollector):
         # Get users and places lists from the includes object
         users = {}
         if 'users' in tweets.includes:
-            users  = {user.id: {'username': user.username,
-                                'verified': user.verified,
-                                'num_followers': user.public_metrics['followers_count']} for user in tweets.includes['users']}
+            users = {user.id: {'username': user.username,
+                               'verified': user.verified,
+                               'num_followers': user.public_metrics['followers_count']} for user in tweets.includes['users']}
         places = {}
         if 'places' in tweets.includes:
             places = {place.id: place.full_name for place in tweets.includes['places']}
@@ -313,7 +310,7 @@ class TwitterDataCollector(BaseDataCollector):
         results = []
         if tweets.data is not None:
             for tweet in tweets.data:
-                if tweet.public_metrics['like_count'] < 100:
+                if tweet.public_metrics['like_count'] < 50:
                     continue
                 result = {}
                 result['tweet_id'] = tweet.id
